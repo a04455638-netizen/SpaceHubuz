@@ -1,0 +1,142 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-11-09T14:42:00Z",
+  "truthfulnessPolicy": "All assets under public/images/generated/ are illustrative design assets and demo visualizations. They are NOT photographic evidence of physical properties. Production venues must use approved owner-uploaded photographs verified through admin moderation.",
+  "assets": [
+    {
+      "file": "/brand/logo.svg",
+      "type": "brandmark",
+      "usage": "Light mode primary navigation header and branding",
+      "dimensions": "280x64",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Creative System (Scalable Vector Graphic)",
+      "status": "ready"
+    },
+    {
+      "file": "/brand/logo-dark.svg",
+      "type": "brandmark",
+      "usage": "Dark mode primary navigation header and branding",
+      "dimensions": "280x64",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Creative System (Scalable Vector Graphic)",
+      "status": "ready"
+    },
+    {
+      "file": "/brand/icon.svg",
+      "type": "icon",
+      "usage": "Favicon, manifest icon and mobile app badge",
+      "dimensions": "64x64",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Creative System (Scalable Vector Graphic)",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/hero-banner.svg",
+      "type": "hero",
+      "usage": "Homepage Hero background and social preview card",
+      "dimensions": "1200x500",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Architectural Vector Composition",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/banner-coworking.svg",
+      "type": "category-banner",
+      "usage": "Coworking & study spaces category hero banner",
+      "dimensions": "800x400",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Vector Illustration",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/banner-sports.svg",
+      "type": "category-banner",
+      "usage": "Sports facilities (futsal, tennis, courts) hero banner",
+      "dimensions": "800x400",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Vector Illustration",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/banner-meetings.svg",
+      "type": "category-banner",
+      "usage": "Conference & training rooms category hero banner",
+      "dimensions": "800x400",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Vector Illustration",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/banner-events.svg",
+      "type": "category-banner",
+      "usage": "Event & celebration venues category hero banner",
+      "dimensions": "800x400",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Vector Illustration",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/demo-coworking-1.svg",
+      "type": "demo-card",
+      "usage": "Illustrative demo card for coworking desk listings",
+      "dimensions": "600x400",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Demo Vector Series",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/demo-sports-1.svg",
+      "type": "demo-card",
+      "usage": "Illustrative demo card for athletic futsal & padel listings",
+      "dimensions": "600x400",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Demo Vector Series",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/demo-meetings-1.svg",
+      "type": "demo-card",
+      "usage": "Illustrative demo card for executive boardroom listings",
+      "dimensions": "600x400",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Demo Vector Series",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/demo-events-1.svg",
+      "type": "demo-card",
+      "usage": "Illustrative demo card for banquet & celebration venue listings",
+      "dimensions": "600x400",
+      "format": "image/svg+xml",
+      "source": "SpaceHub Demo Vector Series",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/empty-bookings.svg",
+      "type": "ui-empty-state",
+      "usage": "Empty state illustration on /account/bookings",
+      "dimensions": "320x240",
+      "format": "image/svg+xml",
+      "source": "SpaceHub UI Design System",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/empty-favorites.svg",
+      "type": "ui-empty-state",
+      "usage": "Empty state illustration on /account/favorites",
+      "dimensions": "320x240",
+      "format": "image/svg+xml",
+      "source": "SpaceHub UI Design System",
+      "status": "ready"
+    },
+    {
+      "file": "/images/generated/empty-search.svg",
+      "type": "ui-empty-state",
+      "usage": "No search results illustration on /explore",
+      "dimensions": "320x240",
+      "format": "image/svg+xml",
+      "source": "SpaceHub UI Design System",
+      "status": "ready"
+    }
+  ]
+}

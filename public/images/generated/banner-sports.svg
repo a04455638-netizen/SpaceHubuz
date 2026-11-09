@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
+  <defs>
+    <linearGradient id="bgSports" x1="0" y1="0" x2="800" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a2a1b"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+    <linearGradient id="pitchGrad" x1="0" y1="0" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" rx="20" fill="url(#bgSports)"/>
+  <!-- Indoor Turf Pitch Perspective -->
+  <polygon points="100,380 700,380 620,160 180,160" fill="url(#pitchGrad)"/>
+  <!-- Field Markings -->
+  <line x1="400" y1="160" x2="400" y2="380" stroke="#ffffff" stroke-width="4" stroke-opacity="0.8"/>
+  <ellipse cx="400" cy="270" rx="70" ry="35" stroke="#ffffff" stroke-width="4" stroke-opacity="0.8" fill="none"/>
+  <!-- Goal Outline -->
+  <rect x="340" y="130" width="120" height="40" stroke="#ffffff" stroke-width="3" stroke-opacity="0.9" fill="none"/>
+  <!-- Stadium Floodlights -->
+  <circle cx="140" cy="80" r="24" fill="#fef08a" fill-opacity="0.25"/>
+  <circle cx="140" cy="80" r="8" fill="#fef08a"/>
+  <circle cx="660" cy="80" r="24" fill="#fef08a" fill-opacity="0.25"/>
+  <circle cx="660" cy="80" r="8" fill="#fef08a"/>
+  <!-- Badge Label -->
+  <rect x="40" y="320" width="220" height="42" rx="10" fill="#052e16"/>
+  <text x="56" y="347" font-family="system-ui, sans-serif" font-weight="700" font-size="16" fill="#86efac">Sport Maydonlari</text>
+</svg>

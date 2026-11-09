@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="iconGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#104a3c"/>
+      <stop offset="50%" stop-color="#176451"/>
+      <stop offset="100%" stop-color="#2ab692"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#iconGrad)"/>
+  <circle cx="32" cy="32" r="9" fill="#ffffff"/>
+  <circle cx="32" cy="32" r="4.5" fill="#176451"/>
+  <path d="M32 14 V19 M32 45 V50 M14 32 H19 M45 32 H50" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="12" r="3" fill="#a7f3d0"/>
+  <circle cx="32" cy="52" r="3" fill="#a7f3d0"/>
+  <circle cx="12" cy="32" r="3" fill="#a7f3d0"/>
+  <circle cx="52" cy="32" r="3" fill="#a7f3d0"/>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
+  <defs>
+    <linearGradient id="bgEvents" x1="0" y1="0" x2="800" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+    <linearGradient id="stageGlow" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" rx="20" fill="url(#bgEvents)"/>
+  <!-- Stage Lighting Beams -->
+  <polygon points="400,0 200,400 300,400" fill="#fde047" fill-opacity="0.12"/>
+  <polygon points="400,0 600,400 500,400" fill="#fde047" fill-opacity="0.12"/>
+  <!-- Celebration Banquet Stage -->
+  <polygon points="200,320 600,320 660,400 140,400" fill="#4338ca"/>
+  <rect x="360" y="270" width="80" height="50" rx="6" fill="url(#stageGlow)"/>
+  <!-- Banquet Table Silhouettes -->
+  <circle cx="180" cy="360" r="18" fill="#e0e7ff" fill-opacity="0.2"/>
+  <circle cx="620" cy="360" r="18" fill="#e0e7ff" fill-opacity="0.2"/>
+  <!-- Confetti / Festive particles -->
+  <circle cx="280" cy="120" r="4" fill="#fbbf24"/>
+  <circle cx="520" cy="110" r="5" fill="#f43f5e"/>
+  <circle cx="360" cy="80" r="3" fill="#38bdf8"/>
+  <circle cx="480" cy="150" r="4" fill="#a7f3d0"/>
+  <!-- Badge Label -->
+  <rect x="40" y="320" width="220" height="42" rx="10" fill="#1e1b4b"/>
+  <text x="56" y="347" font-family="system-ui, sans-serif" font-weight="700" font-size="16" fill="#fde047">Tadbir &amp; Bayram Zallari</text>
+</svg>

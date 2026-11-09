@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <defs>
+    <linearGradient id="sp1" x1="0" y1="0" x2="600" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#052e16"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" rx="16" fill="url(#sp1)"/>
+  <!-- Modern Indoor Futsal Arena -->
+  <polygon points="60,370 540,370 480,180 120,180" fill="#15803d" stroke="#16a34a" stroke-width="2"/>
+  <ellipse cx="300" cy="275" rx="60" ry="25" stroke="#ffffff" stroke-width="3" stroke-opacity="0.9" fill="none"/>
+  <line x1="300" y1="180" x2="300" y2="370" stroke="#ffffff" stroke-width="3" stroke-opacity="0.9"/>
+  <!-- Goal Net -->
+  <polygon points="250,150 350,150 370,180 230,180" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-width="2"/>
+  <!-- Stadium Rafters & Lights -->
+  <line x1="80" y1="40" x2="520" y2="40" stroke="#475569" stroke-width="4"/>
+  <circle cx="160" cy="60" r="14" fill="#fef08a"/>
+  <circle cx="300" cy="60" r="14" fill="#fef08a"/>
+  <circle cx="440" cy="60" r="14" fill="#fef08a"/>
+  <!-- Illustration Watermark Label -->
+  <rect x="20" y="350" width="160" height="30" rx="6" fill="#052e16" fill-opacity="0.8"/>
+  <text x="32" y="370" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#86efac">Demo Illustration</text>
+</svg>

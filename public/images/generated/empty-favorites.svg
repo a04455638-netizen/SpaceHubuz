@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none">
+  <defs>
+    <linearGradient id="favBg" x1="0" y1="0" x2="320" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fdf2f8"/>
+      <stop offset="100%" stop-color="#fce7f3"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="240" rx="16" fill="url(#favBg)"/>
+  <!-- Heart Icon -->
+  <path d="M160 170 L95 105 A40 40 0 0 1 150 55 L160 65 L170 55 A40 40 0 0 1 225 105 Z" fill="#f43f5e" fill-opacity="0.2" stroke="#f43f5e" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="210" cy="70" r="6" fill="#fb7185"/>
+  <circle cx="110" cy="75" r="4" fill="#fda4af"/>
+</svg>

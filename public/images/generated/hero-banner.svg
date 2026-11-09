@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" fill="none">
+  <defs>
+    <linearGradient id="heroSky" x1="0" y1="0" x2="1200" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a1915"/>
+      <stop offset="40%" stop-color="#142c24"/>
+      <stop offset="100%" stop-color="#174f41"/>
+    </linearGradient>
+    <linearGradient id="glowCity" x1="600" y1="350" x2="600" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2ab692" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#104a3c" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="500" fill="url(#heroSky)"/>
+  <!-- Ambient Stars & Glow -->
+  <circle cx="200" cy="80" r="2" fill="#a7f3d0" fill-opacity="0.6"/>
+  <circle cx="450" cy="120" r="2" fill="#a7f3d0" fill-opacity="0.8"/>
+  <circle cx="850" cy="70" r="2" fill="#a7f3d0" fill-opacity="0.5"/>
+  <circle cx="1050" cy="140" r="2" fill="#a7f3d0" fill-opacity="0.7"/>
+  <!-- Modern Tashkent Skyline Silhouette -->
+  <!-- Tashkent TV Tower Stylized -->
+  <line x1="880" y1="90" x2="880" y2="400" stroke="#2ab692" stroke-width="3" stroke-opacity="0.5"/>
+  <polygon points="865,220 895,220 885,200 875,200" fill="#2ab692" fill-opacity="0.6"/>
+  <!-- Nest One & Highrise towers -->
+  <rect x="720" y="160" width="70" height="240" fill="#142e26" stroke="#2ab692" stroke-width="1.5" stroke-opacity="0.4"/>
+  <rect x="630" y="220" width="60" height="180" fill="#0f261f" stroke="#2ab692" stroke-width="1" stroke-opacity="0.3"/>
+  <rect x="940" y="240" width="90" height="160" fill="#0f261f" stroke="#2ab692" stroke-width="1" stroke-opacity="0.3"/>
+  <!-- Glass Architectural Grid on Central Venue -->
+  <rect x="250" y="200" width="340" height="200" rx="12" fill="#16382e" stroke="#2ab692" stroke-width="2" stroke-opacity="0.6"/>
+  <!-- Interior Glow Rooms (Coworking, Sports, Meeting, Event) -->
+  <rect x="270" y="220" width="65" height="45" rx="4" fill="#a7f3d0" fill-opacity="0.4"/>
+  <rect x="350" y="220" width="65" height="45" rx="4" fill="#38bdf8" fill-opacity="0.4"/>
+  <rect x="430" y="220" width="65" height="45" rx="4" fill="#fde047" fill-opacity="0.4"/>
+  <rect x="510" y="220" width="65" height="45" rx="4" fill="#86efac" fill-opacity="0.4"/>
+  <rect x="270" y="280" width="65" height="45" rx="4" fill="#fde047" fill-opacity="0.3"/>
+  <rect x="350" y="280" width="65" height="45" rx="4" fill="#a7f3d0" fill-opacity="0.3"/>
+  <rect x="430" y="280" width="65" height="45" rx="4" fill="#38bdf8" fill-opacity="0.3"/>
+  <rect x="510" y="280" width="65" height="45" rx="4" fill="#86efac" fill-opacity="0.3"/>
+  <!-- Platform Reflection Floor -->
+  <rect y="400" width="1200" height="100" fill="url(#glowCity)"/>
+</svg>

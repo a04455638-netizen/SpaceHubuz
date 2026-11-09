@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <defs>
+    <linearGradient id="ev1" x1="0" y1="0" x2="600" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2e1065"/>
+      <stop offset="100%" stop-color="#581c87"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" rx="16" fill="url(#ev1)"/>
+  <!-- Grand Chandelier Lights -->
+  <circle cx="300" cy="50" r="30" fill="#fde047" fill-opacity="0.2"/>
+  <circle cx="300" cy="50" r="10" fill="#fef08a"/>
+  <!-- Stage Drapery & Glow -->
+  <path d="M50 40 C150 150 150 250 100 380 H50 Z" fill="#3b0764"/>
+  <path d="M550 40 C450 150 450 250 500 380 H550 Z" fill="#3b0764"/>
+  <!-- Raised Podium -->
+  <polygon points="160,330 440,330 490,380 110,380" fill="#7e22ce" stroke="#a855f7" stroke-width="2"/>
+  <!-- Ambient Spotlight Beams -->
+  <polygon points="300,50 150,330 250,330" fill="#fef08a" fill-opacity="0.1"/>
+  <polygon points="300,50 350,330 450,330" fill="#fef08a" fill-opacity="0.1"/>
+  <!-- Illustration Watermark Label -->
+  <rect x="20" y="350" width="160" height="30" rx="6" fill="#3b0764" fill-opacity="0.8"/>
+  <text x="32" y="370" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#fde047">Demo Illustration</text>
+</svg>

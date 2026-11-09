@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none">
+  <defs>
+    <linearGradient id="calBg" x1="0" y1="0" x2="320" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="240" rx="16" fill="url(#calBg)"/>
+  <!-- Calendar Body -->
+  <rect x="80" y="50" width="160" height="140" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="80" y="50" width="160" height="40" rx="14" fill="#176451"/>
+  <!-- Rings -->
+  <rect x="110" y="38" width="12" height="24" rx="4" fill="#0f172a"/>
+  <rect x="198" y="38" width="12" height="24" rx="4" fill="#0f172a"/>
+  <!-- Calendar Grid Lines -->
+  <circle cx="110" cy="120" r="8" fill="#e2e8f0"/>
+  <circle cx="140" cy="120" r="8" fill="#e2e8f0"/>
+  <circle cx="170" cy="120" r="8" fill="#e2e8f0"/>
+  <circle cx="200" cy="120" r="8" fill="#e2e8f0"/>
+  <circle cx="110" cy="150" r="8" fill="#e2e8f0"/>
+  <circle cx="140" cy="150" r="8" fill="#2ab692"/>
+  <circle cx="170" cy="150" r="8" fill="#e2e8f0"/>
+  <circle cx="200" cy="150" r="8" fill="#e2e8f0"/>
+</svg>

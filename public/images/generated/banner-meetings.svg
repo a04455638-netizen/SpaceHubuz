@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
+  <defs>
+    <linearGradient id="bgMeetings" x1="0" y1="0" x2="800" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="screenGlow" x1="0" y1="0" x2="0" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" rx="20" fill="url(#bgMeetings)"/>
+  <!-- Presentation Screen Wall -->
+  <rect x="250" y="50" width="300" height="150" rx="8" fill="url(#screenGlow)" stroke="#94a3b8" stroke-width="3"/>
+  <!-- Chart lines on screen -->
+  <polyline points="280,160 340,120 400,140 460,90 520,75" stroke="#ffffff" stroke-width="4" fill="none"/>
+  <!-- Boardroom Conference Table -->
+  <polygon points="150,380 650,380 550,260 250,260" fill="#334155" stroke="#475569" stroke-width="2"/>
+  <!-- Executive Chairs -->
+  <circle cx="210" cy="340" r="16" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+  <circle cx="330" cy="350" r="16" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+  <circle cx="470" cy="350" r="16" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+  <circle cx="590" cy="340" r="16" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+  <!-- Badge Label -->
+  <rect x="40" y="320" width="220" height="42" rx="10" fill="#0f172a"/>
+  <text x="56" y="347" font-family="system-ui, sans-serif" font-weight="700" font-size="16" fill="#38bdf8">Majlis &amp; Konferensiya</text>
+</svg>
