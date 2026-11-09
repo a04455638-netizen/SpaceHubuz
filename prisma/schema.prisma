@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OccupancyStatus {
+  HELD
+  REQUESTED
+  CONFIRMED
+  BLOCKED
+  RELEASED
+}
+
+model Venue {
+  id          String     @id @default(uuid()) @db.Uuid
+  slug        String     @unique
+  name        String
+  address     String
+  city        String
+  timezone    String     @default("Asia/Tashkent")
+  publishedAt DateTime?  @db.Timestamptz(3)
+  resources   Resource[]
+}
+
+model Resource {
+  id         String      @id @default(uuid()) @db.Uuid
+  venueId    String      @db.Uuid
+  venue      Venue       @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  name       String
+  categoryId String
+  active     Boolean     @default(false)
+  occupancy  Occupancy[]
+
+  @@index([venueId])
+}
+
+model Occupancy {
+  id         String          @id @default(uuid()) @db.Uuid
+  resourceId String          @db.Uuid
+  resource   Resource        @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  startsAt   DateTime        @db.Timestamptz(3)
+  endsAt     DateTime        @db.Timestamptz(3)
+  status     OccupancyStatus
+  expiresAt  DateTime?       @db.Timestamptz(3)
+
+  @@index([resourceId, startsAt])
+}

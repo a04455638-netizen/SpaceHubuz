@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --surface: #faf8f5;
+  --surface-card: #ffffff;
+  --surface-muted: #f1ede4;
+  --surface-subtle: #f8f6f0;
+
+  --ink: #14221d;
+  --ink-muted: #4b6358;
+  --ink-subtle: #798f85;
+  --ink-inverse: #ffffff;
+
+  --accent: #176451;
+  --accent-hover: #104a3c;
+  --accent-subtle: #e6f3ee;
+
+  --border: #e2ddd4;
+  --border-strong: #c8c0b2;
+
+  --status-success: #15803d;
+  --status-success-bg: #f0fdf4;
+  --status-warning: #b45309;
+  --status-warning-bg: #fffbeb;
+  --status-danger: #b91c1c;
+  --status-danger-bg: #fef2f2;
+  --status-info: #0369a1;
+  --status-info-bg: #f0f9ff;
+}
+
+[data-theme="dark"] {
+  --surface: #0f1916;
+  --surface-card: #182823;
+  --surface-muted: #20352f;
+  --surface-subtle: #14221e;
+
+  --ink: #f2f7f4;
+  --ink-muted: #a6c0b5;
+  --ink-subtle: #738f83;
+  --ink-inverse: #0f1916;
+
+  --accent: #2ab692;
+  --accent-hover: #3ad4ab;
+  --accent-subtle: #18372e;
+
+  --border: #29423b;
+  --border-strong: #385b51;
+
+  --status-success: #4ade80;
+  --status-success-bg: #052e16;
+  --status-warning: #fbbf24;
+  --status-warning-bg: #451a03;
+  --status-danger: #f87171;
+  --status-danger-bg: #450a0a;
+  --status-info: #38bdf8;
+  --status-info-bg: #082f49;
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-card: var(--surface-card);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-subtle: var(--surface-subtle);
+
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-ink-inverse: var(--ink-inverse);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-success: var(--status-success);
+  --color-success-bg: var(--status-success-bg);
+  --color-warning: var(--status-warning);
+  --color-warning-bg: var(--status-warning-bg);
+  --color-danger: var(--status-danger);
+  --color-danger-bg: var(--status-danger-bg);
+  --color-info: var(--status-info);
+  --color-info-bg: var(--status-info-bg);
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--ink);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  min-height: 100vh;
+}
