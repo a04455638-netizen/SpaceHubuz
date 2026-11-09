@@ -16,6 +16,7 @@ The existing SpaceHub UZ repository MUST be inspected and preserved. Before dest
 ## 1. BUSINESS DEFINITION AND USER ROLES
 
 A marketplace for locating and reserving:
+
 1. Coworking places and quiet study rooms.
 2. Sports halls and facilities: football/futsal fields, tennis/padel courts, gyms and multi-sport spaces.
 3. Conference rooms, meeting rooms and training classrooms.
@@ -26,7 +27,9 @@ This is a **hybrid multi-owner marketplace**: independent verified venue owners 
 The primary market is Uzbekistan. Default locale `uz`, secondary `ru` and `en`; display local prices in UZS, phone numbers in `+998` format and dates/times in `Asia/Tashkent` for Uzbekistan locations. Store timestamps consistently in UTC and honor each venue's IANA timezone. Make geography, currencies and localization extensible.
 
 ### External product benchmark inspiration (not code or design to copy)
+
 Assess product patterns from at least these eleven examples while designing, but create original brand, UI and code:
+
 - Peerspace: hourly event/meeting bookings and transparent booking policies.
 - Giggster: detailed venue-specific filters and host communication.
 - Tagvenue: event type, capacity and amenity discovery.
@@ -65,6 +68,7 @@ Keep `.env.example`, setup instructions, Prisma migrations, seeding **developmen
 ## 3. INFORMATION ARCHITECTURE — AT LEAST 26 MAIN PAGES
 
 ### Customer-facing public/private website (10 main pages)
+
 1. `/` Home: strong search hero, real featured listings, categories, locations, how booking works, testimonials only when genuine, trust information.
 2. `/explore` Discover places: filters, listing results, search and sorting.
 3. `/venues/[slug]` Place details: real media, facilities, rules, availability, resource selector, reviews, full address and map.
@@ -79,6 +83,7 @@ Keep `.env.example`, setup instructions, Prisma migrations, seeding **developmen
 Additional essential routes: sign in/register/OTP, account security, booking confirmation, notifications, detailed booking receipt, review form, legal/privacy pages and localized not-found/error states.
 
 ### Venue owner portal (7 main pages)
+
 1. Owner dashboard with actionable KPIs.
 2. My venues: multiple branches, facilities and individual bookable resources.
 3. Add/Edit venue with staged form, media upload and moderation state.
@@ -88,6 +93,7 @@ Additional essential routes: sign in/register/OTP, account security, booking con
 7. Owner settings: personnel, notification rules, refund and house policies.
 
 ### Admin console (9 main pages)
+
 1. Platform overview dashboard.
 2. Users/roles and identity status.
 3. Listing moderation and venue management.
@@ -104,15 +110,15 @@ Admin console has its own protected layout and login requirements. **Never place
 
 Implement all thirty; prioritize booking reliability over superficial visual effects.
 
-01. Live, server-authoritative availability when selecting date/time.
-02. Search by place name, district, category and service.
-03. Interactive map and location/distance presentation.
-04. Filters for capacity, price, amenities, review score, time and duration.
-05. Visual availability calendar by *bookable resource*, not only by venue.
-06. Database-enforced prevention of double booking/overlapping intervals.
-07. Real payment provider architecture with verified callbacks.
-08. Booking cancellation according to explicit venue policies.
-09. Refund requests, approval state and payment reconciliation.
+1.  Live, server-authoritative availability when selecting date/time.
+2.  Search by place name, district, category and service.
+3.  Interactive map and location/distance presentation.
+4.  Filters for capacity, price, amenities, review score, time and duration.
+5.  Visual availability calendar by _bookable resource_, not only by venue.
+6.  Database-enforced prevention of double booking/overlapping intervals.
+7.  Real payment provider architecture with verified callbacks.
+8.  Booking cancellation according to explicit venue policies.
+9.  Refund requests, approval state and payment reconciliation.
 10. Permanent customer account and cross-device booking history.
 11. Venue owner dashboard with booking operations.
 12. Moderated venue submission and verification workflow.
@@ -138,28 +144,34 @@ Implement all thirty; prioritize booking reliability over superficial visual eff
 ## 5. CUSTOMER EXPERIENCE — NONNEGOTIABLE DETAILS
 
 ### Registration and identity
+
 Visitors may browse anonymously. Before the first confirmed booking, prompt the customer for first name, optional last name and phone number (Uzbekistan +998 format). Verify via SMS OTP. Request optional profile image only as an optional follow-up; do not block booking if skipped. Allow email as an optional recovery/notification channel. Do not invent OTPs or enable insecure permanent development bypass in production.
 
 Returning customers must be able to sign in from other devices using their verified identity; they must see the same profile and booking history. Keep them signed in during the valid session, provide explicit logout and session revocation; do not require registration after every browser restart if valid secure session remains.
 
 ### Rich customer profile
+
 Provide real editable profile photo (validated size/type, sanitized filenames), first/last name, verified phone, optional email, preferred language, light/dark mode, optional default location, notification preferences, upcoming and previous bookings, paid receipts, favorite places, recently viewed places (with suitable privacy handling), approved reviews, cancellation/refund status, support tickets, security/sessions and account deletion/export options. Profile completeness may be shown without coercive nagging. Provide useful empty/loading/error states and accessible forms.
 
 ### Critical booking visibility
+
 When **customer A** successfully reserves a resource between `10:00–11:00`, every other customer viewing that same resource/date must see **10:00–11:00 as BOOKED / unavailable**, without seeing customer A's personal identity. Show the remaining free intervals distinctly. When a booking is released or canceled per rules, availability must update. Display the place's full address, map, exact date, start/end time and local timezone, price and conditions alongside the calendar.
 
 Customer A must see the booking in **My Bookings** after reloading, closing and reopening the site, logging out and back in, or logging in from a different device. The reservation is stored in PostgreSQL, never only localStorage or a browser state variable. Ownership and authorization on `GET booking by ID` must be validated on the server.
 
 ### Example calendar (illustration only)
+
 Venue: Futsal Court A; sample address: Chilonzor, Tashkent (not a real listing).
+
 - 09:00–10:00 Available
 - 10:00–11:00 Booked
 - 11:00–12:00 Available
 - 12:00–13:00 Booked
 - 13:00–14:00 Available
-If a customer clicks a booked slot, disable the button, explain it is unavailable and suggest nearby alternatives.
+  If a customer clicks a booked slot, disable the button, explain it is unavailable and suggest nearby alternatives.
 
 ### Booking detail card
+
 Show actual venue photo and name, resource name, full address, map directions link, date, timezone, start/end, length, subtotal/fees/total, paid/unpaid/refunded state, booking state, unique reference, QR check-in when applicable, cancellation and refund rules, owner/platform support contact path, and status timeline. Do not reveal private customer details to other users.
 
 ## 6. RELIABLE BOOKING ENGINE — DESIGN BEFORE IMPLEMENTING UI
@@ -168,7 +180,7 @@ Implement robust interval-based inventory because resources can have different d
 
 Booking state machine should cover at least: `DRAFT` (if stored), `HOLD` with expiry, `AWAITING_PAYMENT`, `REQUESTED` (where owner approval is needed), `CONFIRMED`, `CHECKED_IN`, `COMPLETED`, `CANCELLED`, `EXPIRED`, `NO_SHOW`, `REFUND_PENDING`, `REFUNDED` as applicable. Define valid transitions and exactly which states occupy inventory. Keep financial status distinct from reservation status where appropriate.
 
-**Race-safe booking:** For resource/date/time intervals, enforce exclusion of overlapping *inventory-occupying* reservations at the database level using a PostgreSQL exclusion constraint/range strategy or an equivalent proven transactional design. Prisma alone may not expose every PostgreSQL constraint; add reviewed SQL migrations where necessary. Revalidate availability in one atomic transaction. Make checkout and webhook processing idempotent. Handle two simultaneous requests so that only one gets a confirmed reservation. Never rely on button disabling, client-side state, cache invalidation or optimistic UI as the sole protection.
+**Race-safe booking:** For resource/date/time intervals, enforce exclusion of overlapping _inventory-occupying_ reservations at the database level using a PostgreSQL exclusion constraint/range strategy or an equivalent proven transactional design. Prisma alone may not expose every PostgreSQL constraint; add reviewed SQL migrations where necessary. Revalidate availability in one atomic transaction. Make checkout and webhook processing idempotent. Handle two simultaneous requests so that only one gets a confirmed reservation. Never rely on button disabling, client-side state, cache invalidation or optimistic UI as the sole protection.
 
 Temporary holds must expire via durable scheduled processing; expiration must release inventory. If payment completion arrives after hold expiry, do not blindly confirm a taken slot: reconcile/reject/refund according to documented rules. Protect against replayed webhooks and race conditions. Auditable cancellations and refund decisions are mandatory.
 
@@ -177,6 +189,7 @@ Real-time updates should communicate occupancy changes through SSE/WebSockets or
 ## 7. EXPANDED FEATURES FROM MARKETPLACE RESEARCH
 
 In addition to the 30 mandatory features, include these practical differentiators, staged according to complexity:
+
 - Side-by-side compare up to 3 venues with total price, capacity, location, equipment and availability.
 - Clearly itemized **full price before pay**: base, service fees, extras, deposits, promotions and taxes if applicable.
 - Two booking workflows: instant confirmation for supported resources and approval-request for owner-controlled venues.
@@ -203,6 +216,7 @@ Do not add speculative features that distract from booking stability. All listed
 ## 8. DATA MODEL AND API DESIGN
 
 Design and migrate normalized tables/models, adjusting names as needed:
+
 - User, UserIdentity, Session, Role, RoleAssignment, UserProfile.
 - OwnerOrganization, OwnerMembership, Venue, VenueVerification, Branch.
 - Resource, ResourceCategory, VenueAmenity, ResourceAmenity, VenueMedia.
@@ -235,6 +249,7 @@ Performance: modern image optimizations, pagination/lazy loading, caching for pu
 ## 11. ADMIN AND OWNER OPERATIONS
 
 OWNER:
+
 - Step-by-step new venue creation with saved drafts.
 - Manage address, verified geolocation, categories, amenities, media, house rules, operating hours, per-room/court schedules, durations, prices, add-ons and deposits.
 - View new, confirmed, completed and canceled reservations.
@@ -244,6 +259,7 @@ OWNER:
 - Block maintenance time and prevent existing-confirmed-booking conflicts.
 
 ADMIN:
+
 - Verify owners and moderate venue listings before public publication.
 - See operational dashboards: booking conversion, total bookings, gross transaction volume, applicable marketplace fees, refunds, disputes, utilization and active owners.
 - Search/filter users, owners, venues, bookings and transactions.
@@ -258,6 +274,7 @@ No developer backdoor, no public super-admin registration, no hardcoded producti
 ## 11A. SUPABASE-FIRST IMPLEMENTATION CONTRACT (CRITICAL)
 
 ### A. Authentication and secure identity
+
 - Use the current maintained Supabase SSR setup for Next.js App Router (`@supabase/ssr`): browser and server clients, secure cookie refresh, SSR-safe access checks, and server-side validation of the current user.
 - Guests can search and view public venues; login/registration is requested at booking. First name, last name (optional) and +998 phone number. Verify phone with real OTP provider when configured. Photo/email optional.
 - A user may sign in again on another device and see the same profile, favorites, payment receipts and upcoming/past/cancelled bookings. Neither refresh, browser closure nor sign-out deletes bookings.
@@ -265,6 +282,7 @@ No developer backdoor, no public super-admin registration, no hardcoded producti
 - Document SMTP/phone provider configuration separately; if the SMS provider is unavailable, explain how a local test simulator works and NEVER make its bypass available in production.
 
 ### B. Explicit environment variable contract
+
 Use ONLY environment variable placeholders in committed templates; never demand real key values inside the prompt or chat. Document exact meanings and required permissions. Recommended `.env.example`:
 
 ```dotenv
@@ -306,6 +324,7 @@ APP_BASE_URL=
 - Explain clearly how to find the Supabase Project URL, publishable key and server-only secret key in project settings, how to get the database connection string, and where the user must configure OpenAI API credentials, SMS and payment providers. Never assume any key is already configured.
 
 ### C. PostgreSQL schema, RLS, and migrations
+
 - Model `profiles` linked 1:1 to `auth.users.id`; `roles` and owner memberships; `venues` and `venue_resources`; resource media; availability rules; closure periods; `booking_holds`; `bookings`; `booking_events`; `payments`; `refunds`; `reviews`; favorites; tickets; notification deliveries; generated asset provenance; and `audit_logs`. Align with the existing data model rather than blindly duplicate tables.
 - Every **exposed** table must use carefully scoped RLS and appropriate grants. Public users may read only verified/published venue details and public availability; authenticated customers may access their own profiles and bookings; owners may access only records for venues they own/staff; admins must be authorized server-side. Private owner financial/customer data must never appear in public searches.
 - Apply RLS + storage bucket policies in version-controlled migrations. Test `anon`, unrelated customer, correct customer, different owner, actual owner and admin cases, including SELECT/INSERT/UPDATE/DELETE denials. Do not create permissive `USING (true)` for private data.
@@ -313,6 +332,7 @@ APP_BASE_URL=
 - Design a forward-only, reversible-where-possible migration process and documented production backup/restore procedure. Never run destructive `db push --force-reset` or drop a production schema. Migration history must be reviewable.
 
 ### D. Race-safe real-time booking contract
+
 - Database is source of truth, NOT React state, localStorage, browser cache, WebSocket messages or AI output.
 - Define resource-specific intervals with `[start_at, end_at)` semantics and UTC storage, venue timezone display. Distinguish venue and independently bookable resources such as separate rooms, courts and halls.
 - Choose and implement a verified DB-level overlapping-slot prevention strategy: PostgreSQL GiST exclusion constraint / range type for inventory-occupying statuses or a proven equivalent transaction/locking design. Include SQL migrations if Prisma cannot define the constraint directly. Document and test the exact inventory occupancy rules.
@@ -327,6 +347,7 @@ APP_BASE_URL=
 Build a functional, helpful **SpaceHub AI** assistant visible as (a) an accessible floating support/chat launcher and (b) a full `/ai-assistant` page. Uzbek is default, Russian and English supported. It must answer questions and help users search, choose and compare real venues using authorized current marketplace data.
 
 ### Backend and tools
+
 1. Use maintained official OpenAI SDK **Responses API**, invoked in a **server-only** Next.js route/service. Do not use retired Assistants API or put requests with the API key directly in browser code.
 2. Store model selection in `OPENAI_MODEL` and validate availability via current API docs. Do not hardcode a speculative model name or silently fallback to an unconfigured one.
 3. Build an explicit read-only tool layer such as `search_venues`, `get_venue_details`, `get_resource_availability`, `calculate_booking_quote`, `compare_venues`, `get_policy`, `get_my_bookings` (authenticated and owner checked). Validate structured tool arguments on the server.
@@ -339,6 +360,7 @@ Build a functional, helpful **SpaceHub AI** assistant visible as (a) an accessib
 10. Add AI interaction tests: grounding, tool authorization, injection resistance, cost/rate limits, nonexistent venue queries, unavailable dates, and correct Uzbek/Russian/English behavior.
 
 ### AI interface details
+
 - Premium assistant chat with suggested prompts, venue preview cards (only real database matches), clear price/address/availability links, chat reset, copy responses and navigation to real venue pages.
 - Example suggested prompts: “Chilonzorda ertaga kechqurun bo‘sh futbol maydonlarini ko‘rsat”; “20 kishilik konferensiya xonasi kerak”; “2 ta coworking joyini narxi va imkoniyatlari bo‘yicha solishtir”.
 - Chat must distinguish factual, verified live availability from general suggestions. Provide timestamps for availability checks and revalidate before purchase.
@@ -348,11 +370,13 @@ Build a functional, helpful **SpaceHub AI** assistant visible as (a) an accessib
 The user explicitly wants the project to **create its own visual assets**, not show unrelated photos or broken placeholder boxes. Build a complete asset workflow with professional, coherent creative direction.
 
 ### Design identity and visual system
+
 - Brand: **SpaceHub UZ**. Create an original brandmark, scalable vector logo (SVG), mono/light/dark versions, favicon, social preview and a modern editorial visual identity. Avoid copying any competitor's marks or layouts.
 - Design: elegant, sophisticated, attractive but readable. High-quality hero area, strong typography, spacious cards, one primary accent, map/search integration, convincing booking details, well-structured modern admin dashboard. Never use generic fake logos, cluttered gradients or inconsistent icon families.
 - Colors: light `#F8FAFC` background, `#FFFFFF` surfaces, `#0F172A` text, blue `#2563EB` actions, teal/green `#10B981` success; compatible dark tokens. Respect color contrast and WCAG 2.2 AA where feasible. Use Geist or Inter. Mobile first with no overflow.
 
 ### Generate assets and actually save files
+
 1. Inspect what Antigravity tools are genuinely available. If an image-generation capability is available, use it to create original branded static visuals. If using an API, support a server-only, **budget-controlled** script using the official OpenAI image-generation API with `OPENAI_IMAGE_MODEL` configured to a currently supported image model. Do not fabricate generated images when the tool/API cannot run.
 2. Create a practical asset inventory and generate/save real files under `public/images/generated/` or upload through an authorized Supabase Storage workflow. Deliver a manifest indicating each file, prompt, usage, dimensions, generation source and whether the file was successfully produced.
 3. First batch: 2 hero concepts (responsive desktop/mobile crops), 4 unique category banners (coworking, sport, meeting, events), 8 original **illustrative demo card images** (2 per category), 4 helpful empty-state illustrations, 3 onboarding/FAQ visuals, one social preview, logo and icons. Aim for 20+ meaningful visual assets, but do not run expensive generations without configured credentials and budget; prioritize best-impact assets first.
@@ -369,6 +393,7 @@ The user explicitly wants the project to **create its own visual assets**, not s
 In addition to the 26 essential routes listed above, include dedicated fully functional page/route flows where justified, such as category search routes (`/explore/coworking`, `/explore/sports`, `/explore/meetings`, `/explore/events`), `/compare`, `/account/payment-history`, `/account/reviews`, `/account/notifications`, `/account/security`, `/help`, `/about`, `/legal/privacy`, `/legal/terms`, `/ai-assistant`, and booking confirmation/detail routes. Route structure can differ, but deliver **at least 37 distinct meaningful user/owner/admin screens**, never 37 empty duplicates. Use proper dynamic routes so category and venue-specific content differ.
 
 ### Customer journey
+
 1. Guest enters polished homepage and finds real category cards, practical popular destinations and search with dates, capacity and neighborhood.
 2. Search returns real, filterable and sortable approved venue inventory and optional interactive map; show fee-inclusive prices where possible.
 3. Venue detail shows location/address, verified actual images or labeled concept placeholder, individual rooms/courts, facilities, schedules, availability, safety/rules and real reviews.
@@ -377,6 +402,7 @@ In addition to the 26 essential routes listed above, include dedicated fully fun
 6. Customer returns days later, signs in from another device and still sees all reservations. They can cancel/request refund under explicit rules, rebook after a fresh availability check, contact support, save venue or review after eligible visit.
 
 ### Design acceptance
+
 - Beautiful, consistent original visual language across Home, Browse, Detail, Calendar, Checkout, Profile, Owner portal, and Admin dashboard; all designed deliberately, not assembled from random unrelated templates.
 - Usable on 360px mobile, common tablets and large desktops; no horizontally clipped navigation, working mobile menu, keyboard navigation, visible focus, reduced motion, theme and language persistence.
 - Strong empty, loading, error, permission-denied and no-results states.
@@ -399,66 +425,76 @@ In addition to the 26 essential routes listed above, include dedicated fully fun
 ## 12. TEN IMPLEMENTATION PHASES WITH ACCEPTANCE CRITERIA
 
 ### PHASE 1 — Project setup and system architecture
+
 - Inspect repository; initialize Next.js App Router, TypeScript and Tailwind CSS when not already present.
 - Define folder structure, design tokens, lint/format/typecheck, project README and `.env.example`.
 - Document role diagram, database design and booking state machine before building booking UI.
 - Configure CI and baseline test framework.
-**Gate:** repository starts, typecheck/lint succeed, architecture is documented.
+  **Gate:** repository starts, typecheck/lint succeed, architecture is documented.
 
 ### PHASE 2 — Design system and customer-facing shell
+
 - Original visual identity, reusable components, responsive navbar/footer, localization and theme switching.
 - Functional Home, Explore, Listing details and Map scaffolds using clearly labeled development seed data.
 - Real navigation, search/filter interactions, accessible forms and loading states.
 - Create original SVG brand assets and generate/curate truthful branded category/hero demo images per Section 11C, actually saving image files with manifest.
-**Gate:** responsive layout on phone/tablet/desktop, no nonfunctional visible controls, all major routes resolve.
+  **Gate:** responsive layout on phone/tablet/desktop, no nonfunctional visible controls, all major routes resolve.
 
 ### PHASE 3 — Database, backend and authorization foundations
+
 - Supabase PostgreSQL + Supabase Auth SSR + Prisma/SQL migrations, secured API, validation, query architecture, Storage and RLS policies/tests.
 - Resource-level availability model and database-level overlap protection planning/implementation.
 - Audit logs and authorization guards for each role.
-**Gate:** database tests pass; unauthorized API access is rejected; migrations work from clean DB.
+  **Gate:** database tests pass; unauthorized API access is rejected; migrations work from clean DB.
 
 ### PHASE 4 — Authentication, user onboarding and customer profile
+
 - Phone +998 validation with Supabase Auth OTP/SMS provider adapter, registration/login, session handling and logout.
 - Profile photo, rich preferences, favorites and editable identity fields.
 - Guest browsing stays available; booking requires verified user.
-**Gate:** profile persists across reload/devices; identity verification and security tests pass.
+  **Gate:** profile persists across reload/devices; identity verification and security tests pass.
 
 ### PHASE 5 — Venue, resource and booking engine
+
 - Owner venue creation, per-resource calendars, opening hours, price schedules and blocks.
 - Search filters and booking UX with interval selection and time zone handling.
 - Atomic booking/hold/confirmation state machine and conflict responses.
 - My Bookings detail: address/map/time/QR/status timeline.
-**Gate:** two simultaneous bookings cannot occupy the same slot; booked slots update for other customers; booking persists after logout/relogin.
+  **Gate:** two simultaneous bookings cannot occupy the same slot; booked slots update for other customers; booking persists after logout/relogin.
 
 ### PHASE 6 — Payments, cancellation and notifications
+
 - Secure payment adapters, provider webhook validation, financial state transitions, refunds and cancellation policies.
 - Telegram operational bot, notification templates, queues, reminders and delivery logs.
 - Price breakdown and truthful checkout status.
-**Gate:** repeated webhooks do not double-charge/create bookings; payment failure and hold expiry leave correct inventory state.
+  **Gate:** repeated webhooks do not double-charge/create bookings; payment failure and hold expiry leave correct inventory state.
 
 ### PHASE 7 — Owner dashboard and venue operations
+
 - Full 7-page owner experience, multiple venues/branches/resources and team access.
 - Booking approvals, schedule blocks, media, analytics and earnings.
-**Gate:** owner cannot change another owner's venue; confirmed customer booking appears in owner dashboard.
+  **Gate:** owner cannot change another owner's venue; confirmed customer booking appears in owner dashboard.
 
 ### PHASE 8 — Admin console and moderation
+
 - Full 9-page admin experience: users, approvals, listings, bookings, transactions, analytics, support, audit and settings.
 - Least-privilege role enforcement and secure administrative actions.
-**Gate:** no public access to restricted pages/API; all privileged operations auditable.
+  **Gate:** no public access to restricted pages/API; all privileged operations auditable.
 
 ### PHASE 9 — Advanced customer-value features
+
 - Implement remaining mandatory 30 features plus high-value differentiators: compare, waitlist, recurring reservations, QR, add-ons, optional group booking, calendar export, corporate flows where practical.
 - Implement the server-only OpenAI Responses AI concierge with strict grounding, rate/cost controls, fail-safe UI, test coverage and actual configured credentials.
 - Finish 37+ meaningful routes/screens and image asset inventory with truthful real-photo-versus-illustration labeling.
 - Complete i18n translations, mobile polish, accessibility and performance improvement.
-**Gate:** features use real persisted data and correct policies; no decorative/fake functionality.
+  **Gate:** features use real persisted data and correct policies; no decorative/fake functionality.
 
 ### PHASE 10 — QA, security, launch readiness and deployment
+
 - Automated unit/integration/E2E/race tests, Supabase RLS + Storage policy tests, OpenAI/tool authorization tests, security review, rate limit verification, observability/logging.
 - Error handling, SEO, asset optimization, backup/restore plan, staging smoke tests, production-ready `.env.example` and deploy guide.
 - Deploy only when actual accounts/credentials are available; otherwise provide exact unfulfilled integration/setup checklist without claiming go-live.
-**Gate:** `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` (or equivalent commands) pass; migration/backup and E2E workflow documented and verified where environment permits.
+  **Gate:** `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` (or equivalent commands) pass; migration/backup and E2E workflow documented and verified where environment permits.
 
 ## 13. MANDATORY END-TO-END SCENARIOS
 
@@ -484,6 +520,7 @@ Write real automated tests with an isolated test PostgreSQL database and product
 ## 14. FINAL DELIVERY REQUIREMENTS
 
 At completion provide:
+
 - Working organized project repository with all significant source files and real API endpoints.
 - Database schema, reviewed migrations and safe dev seed instructions.
 - Premium original redesign with 37+ real screens/routes, generated/original marketing visuals, verified actual venue photography policy, customer website + separate owner portal + protected admin console.
@@ -498,7 +535,6 @@ At completion provide:
 **Additional core promise:** AI and imagery must make the marketplace more helpful and visually exceptional without making up places, pretending demonstration images are real photos, exposing secrets or bypassing booking protections.
 
 **Core promise:** If customer A booked a venue/resource at a given time, customer B sees that time as booked and cannot double-book it; customer A still sees their booking, venue address and dates after logging out and back in. Build the product around making this promise demonstrably true.
-
 
 ## 15. ANTIGRAVITY AGENT EXECUTION PROTOCOL — FOLLOW EXACTLY
 
