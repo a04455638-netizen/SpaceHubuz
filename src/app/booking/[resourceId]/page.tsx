@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Calendar as CalendarIcon,
@@ -9,8 +10,11 @@ import {
   ArrowLeft,
   AlertCircle,
   CheckCircle,
+  MapPin,
+  Building2,
 } from "lucide-react";
 import { formatPrice } from "@/lib/format-price";
+import { CURATED_VENUES } from "@/server/mock-venues";
 
 interface Slot {
   startsAt: string;
@@ -24,6 +28,20 @@ export default function BookingResourcePage({
 }) {
   const { resourceId } = use(params);
   const router = useRouter();
+
+  // Find venue & resource
+  const matchedVenue = CURATED_VENUES.find((v) =>
+    v.resources.some((r) => r.id === resourceId) || v.id === resourceId || v.slug === resourceId
+  );
+  const matchedResource =
+    matchedVenue?.resources.find((r) => r.id === resourceId) || matchedVenue?.resources[0];
+
+  const basePriceHourly = matchedResource?.pricePerHour || matchedVenue?.pricePerHour || 50000;
+  const venueTitle = matchedVenue?.name || "SpaceHub Joyi";
+  const resourceTitle = matchedResource?.name || "Asosiy Zal / Maydon";
+  const venueAddress = matchedVenue?.address || "Toshkent shahri";
+  const venueImage = matchedVenue?.featuredImage || "/brand/logo.svg";
+  const backHref = matchedVenue ? `/venues/${matchedVenue.slug}` : "/explore";
 
   const [date, setDate] = useState(() =>
     new Date(Date.now() + 86400000).toISOString().split("T")[0],
@@ -51,8 +69,6 @@ export default function BookingResourcePage({
     });
     return () => cancelAnimationFrame(handle);
   }, []);
-
-  const basePriceHourly = 50000; // 50,000 UZS base
 
   const addonsList = [
     { id: "wifi_highspeed", name: "Premium Wi-Fi (100 Mbps)", price: 15000 },
@@ -139,11 +155,15 @@ export default function BookingResourcePage({
         return;
       }
 
-      // Persist customer info in localStorage
+      // Persist customer info in localStorage and cookies
       try {
         localStorage.setItem("spacehub_auth_verified", "true");
         localStorage.setItem("spacehub_user_name", customerName);
         localStorage.setItem("spacehub_user_phone", customerPhone);
+        document.cookie = `spacehub_user_phone=${encodeURIComponent(customerPhone)}; path=/; max-age=31536000; SameSite=Lax`;
+        document.cookie = `spacehub_user=${encodeURIComponent(
+          JSON.stringify({ phone: customerPhone, fullName: customerName })
+        )}; path=/; max-age=31536000; SameSite=Lax`;
       } catch {
         // ignore
       }
@@ -152,6 +172,9 @@ export default function BookingResourcePage({
         `booking_${data.bookingId}`,
         JSON.stringify({
           resourceId,
+          venueName: venueTitle,
+          resourceName: resourceTitle,
+          address: venueAddress,
           date,
           startHour,
           durationHours,
@@ -173,11 +196,44 @@ export default function BookingResourcePage({
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <Link
-        href={`/venues/${resourceId}`}
+        href={backHref}
         className="inline-flex items-center gap-2 text-xs font-semibold text-accent hover:underline mb-6"
       >
         <ArrowLeft className="h-4 w-4" /> Orqaga qaytish
       </Link>
+
+      {/* Selected Venue Header Badge */}
+      <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-2xl border border-border bg-surface-card p-4 shadow-sm">
+        <div className="relative h-16 w-24 sm:h-20 sm:w-28 shrink-0 overflow-hidden rounded-xl bg-surface-muted">
+          <Image
+            src={venueImage}
+            alt={venueTitle}
+            fill
+            className="object-cover"
+            sizes="120px"
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-md bg-accent-subtle px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent">
+              <Building2 className="h-3 w-3" /> {venueTitle}
+            </span>
+          </div>
+          <h2 className="mt-1 text-base font-black text-ink truncate">
+            {resourceTitle}
+          </h2>
+          <p className="flex items-center gap-1 text-xs text-ink-muted mt-0.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-ink-subtle" />
+            <span className="truncate">{venueAddress}</span>
+          </p>
+        </div>
+        <div className="text-right sm:self-center">
+          <p className="text-[10px] uppercase font-bold text-ink-muted">1 soat narxi</p>
+          <p className="text-base font-extrabold text-accent">
+            {formatPrice(basePriceHourly)} UZS
+          </p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {/* Left: Configuration form */}

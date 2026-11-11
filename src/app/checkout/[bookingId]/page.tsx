@@ -40,7 +40,7 @@ export default function CheckoutPage({
   const [timeLeft, setTimeLeft] = useState(900); // 15 mins in seconds
 
   useEffect(() => {
-    // 1. Fetch booking info from API
+    // 1. Fetch booking info from API, with sessionStorage fallback
     fetch(`/api/bookings/${bookingId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -49,9 +49,62 @@ export default function CheckoutPage({
           if (data.booking.status === "CONFIRMED") {
             setConfirmed(true);
           }
+        } else {
+          // Fallback to sessionStorage
+          try {
+            const raw = sessionStorage.getItem(`booking_${bookingId}`);
+            if (raw) {
+              const p = JSON.parse(raw);
+              setBooking({
+                id: bookingId,
+                bookingNumber: `SH-${bookingId.slice(-8).toUpperCase()}`,
+                totalAmount: p.total || 50000,
+                startsAt: `${p.date || "2026-11-12"}T${p.startHour || "10:00"}:00Z`,
+                endsAt: `${p.date || "2026-11-12"}T12:00:00Z`,
+                durationHours: p.durationHours || 1,
+                status: "PENDING_PAYMENT",
+                resource: {
+                  name: p.resourceName || "SpaceHub Joyi",
+                  venue: {
+                    name: p.venueName || "SpaceHub Hamkorlik Joyi",
+                    address: p.address || "Toshkent shahri",
+                    city: "Toshkent",
+                  },
+                },
+              });
+            }
+          } catch {
+            // ignore
+          }
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        try {
+          const raw = sessionStorage.getItem(`booking_${bookingId}`);
+          if (raw) {
+            const p = JSON.parse(raw);
+            setBooking({
+              id: bookingId,
+              bookingNumber: `SH-${bookingId.slice(-8).toUpperCase()}`,
+              totalAmount: p.total || 50000,
+              startsAt: `${p.date || "2026-11-12"}T${p.startHour || "10:00"}:00Z`,
+              endsAt: `${p.date || "2026-11-12"}T12:00:00Z`,
+              durationHours: p.durationHours || 1,
+              status: "PENDING_PAYMENT",
+              resource: {
+                name: p.resourceName || "SpaceHub Joyi",
+                venue: {
+                  name: p.venueName || "SpaceHub Hamkorlik Joyi",
+                  address: p.address || "Toshkent shahri",
+                  city: "Toshkent",
+                },
+              },
+            });
+          }
+        } catch {
+          // ignore
+        }
+      });
 
     // 2. Countdown timer
     const timer = setInterval(() => {

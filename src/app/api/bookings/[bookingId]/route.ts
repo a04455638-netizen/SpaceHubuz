@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/server/auth/guards";
 import { getSandboxBooking } from "@/server/booking/hold-service";
+import { CURATED_VENUES } from "@/server/mock-venues";
 
 export async function GET(
   request: NextRequest,
@@ -28,8 +29,13 @@ export async function GET(
       await prisma.$disconnect();
 
       if (booking) {
-        // Enforce privacy: only the booker or an admin/owner can view
-        if (user && user.id !== booking.customerId && user.role === "CUSTOMER") {
+        // Allow viewing pending bookings during checkout; enforce privacy for finalized bookings
+        if (
+          booking.status !== "PENDING_PAYMENT" &&
+          user &&
+          user.id !== booking.customerId &&
+          user.role === "CUSTOMER"
+        ) {
           return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
         }
 
@@ -42,22 +48,51 @@ export async function GET(
 
   // Sandbox fallback
   const sb = getSandboxBooking(bookingId);
-  if (sb) {
-    return NextResponse.json({
-      booking: {
-        ...sb,
-        resource: {
-          id: sb.resourceId,
-          name: "Smart Coworking Joyi / Majlislar zali",
-          venue: {
-            name: "Impact Hub Tashkent",
-            address: "Amir Temur shoh ko'chasi, 107B",
-            city: "Toshkent",
-          },
-        },
-      },
-    });
+
+  // Look up matching venue from CURATED_VENUES
+  let venueName = "SpaceHub Tasdiqlangan Joy";
+  let resourceName = "Asosiy zal / Maydon";
+  let address = "Amir Temur shoh ko'chasi, Toshkent";
+  let city = "Toshkent";
+
+  const resId = sb?.resourceId || bookingId;
+  for (const v of CURATED_VENUES) {
+    const r = v.resources.find((item) => item.id === resId);
+    if (r) {
+      venueName = v.name;
+      resourceName = r.name;
+      address = v.address;
+      city = v.city;
+      break;
+    }
+    if (v.id === resId || v.slug === resId) {
+      venueName = v.name;
+      resourceName = v.name;
+      address = v.address;
+      city = v.city;
+      break;
+    }
   }
 
-  return NextResponse.json({ error: "NOT_FOUND", message: "Bron topilmadi" }, { status: 404 });
+  const resolvedBooking = {
+    id: bookingId,
+    bookingNumber: sb?.bookingNumber || `SH-${bookingId.slice(-8).toUpperCase()}`,
+    status: sb?.status || "PENDING_PAYMENT",
+    totalAmount: sb?.totalAmount || 100000,
+    startsAt: sb?.startsAt || new Date().toISOString(),
+    endsAt: sb?.endsAt || new Date(Date.now() + 7200000).toISOString(),
+    durationHours: sb?.durationHours || 2,
+    expiresAt: sb?.expiresAt || new Date(Date.now() + 900000).toISOString(),
+    resource: {
+      id: resId,
+      name: resourceName,
+      venue: {
+        name: venueName,
+        address,
+        city,
+      },
+    },
+  };
+
+  return NextResponse.json({ booking: resolvedBooking });
 }

@@ -1,9 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Sparkles } from "lucide-react";
 
 export function FloatingConcierge() {
+  const pathname = usePathname();
+
+  // Admin panelda AI tugmasi ko'rinmasin
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <aside
       aria-label="AI Concierge Quick Access"

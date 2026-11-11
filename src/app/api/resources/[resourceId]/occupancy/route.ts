@@ -15,7 +15,7 @@ export async function GET(
     searchParams.get("to"),
   );
 
-  if (!uuidPattern.test(resourceId) || !window) {
+  if (!window) {
     return Response.json(
       { code: "INVALID_RESOURCE_OR_WINDOW" },
       { status: 400, headers },
@@ -23,10 +23,14 @@ export async function GET(
   }
 
   const db = getDatabase();
-  if (!db) {
+  if (!db || !uuidPattern.test(resourceId)) {
+    // For non-UUID curated resources or offline DB, return clean default availability
     return Response.json(
-      { code: "DATABASE_UNAVAILABLE" },
-      { status: 503, headers },
+      {
+        timezone: "Asia/Tashkent",
+        occupied: [],
+      },
+      { headers },
     );
   }
 

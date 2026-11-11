@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Phone, Sparkles, X, Check, ArrowRight } from "lucide-react";
 
 export function WelcomePhoneModal() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [phone, setPhone] = useState("+998 ");
   const [fullName, setFullName] = useState("");
@@ -11,6 +13,8 @@ export function WelcomePhoneModal() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (pathname?.startsWith("/admin")) return;
+
     // Check if user has already entered a phone or was already prompted
     const existingPhone = localStorage.getItem("spacehub_user_phone");
     const wasPrompted = localStorage.getItem("spacehub_welcome_prompted");
@@ -22,7 +26,11 @@ export function WelcomePhoneModal() {
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [pathname]);
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   function handleDismiss() {
     // Mark as prompted so it is NEVER asked again
