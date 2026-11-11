@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { Navbar } from "../components/layout/navbar";
 import { Footer } from "../components/layout/footer";
 import { FloatingConcierge } from "../components/ai/floating-concierge";
+import { WelcomePhoneModal } from "../components/auth/welcome-phone-modal";
 import { I18nProvider, type Locale } from "../lib/i18n";
 import "./globals.css";
 
@@ -61,6 +62,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <div className="flex-1">{children}</div>
           <Footer />
           <FloatingConcierge />
+          <WelcomePhoneModal />
         </I18nProvider>
       </body>
     </html>

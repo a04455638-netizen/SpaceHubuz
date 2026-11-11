@@ -45,15 +45,33 @@ export default function AccountProfilePage() {
     setLoading(true);
 
     localStorage.setItem("spacehub_user_name", fullName);
+    localStorage.setItem("spacehub_user_phone", phone);
     localStorage.setItem("spacehub_locale", language);
     localStorage.setItem("spacehub_theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
+
+    // Sync cookies for server recognition
+    document.cookie = `spacehub_user_phone=${encodeURIComponent(phone)}; path=/; max-age=31536000; SameSite=Lax`;
+    try {
+      const existing = localStorage.getItem("spacehub_user");
+      const baseObj = existing ? JSON.parse(existing) : {};
+      const updatedUser = {
+        ...baseObj,
+        fullName,
+        phone,
+        preferredLanguage: language,
+      };
+      localStorage.setItem("spacehub_user", JSON.stringify(updatedUser));
+      document.cookie = `spacehub_user=${encodeURIComponent(JSON.stringify(updatedUser))}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch {
+      // ignore
+    }
 
     try {
       await fetch("/api/account/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, email, preferredLanguage: language }),
+        body: JSON.stringify({ fullName, phone, email, preferredLanguage: language }),
       });
     } catch {
       // Local changes still preserved
@@ -104,14 +122,16 @@ export default function AccountProfilePage() {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
-              Telefon raqami (Tasdiqlangan)
+              Telefon raqami
             </label>
             <div className="relative mt-1.5">
               <input
-                type="text"
-                disabled
+                type="tel"
                 value={phone}
-                className="w-full cursor-not-allowed rounded-xl border border-border bg-surface-muted px-4 py-2.5 text-sm font-semibold text-ink-muted"
+                required
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+998 90 123 45 67"
+                className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-medium text-ink focus:border-accent focus:outline-none"
               />
             </div>
           </div>

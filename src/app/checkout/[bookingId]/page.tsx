@@ -72,6 +72,19 @@ export default function CheckoutPage({
       cash: "CASH_AT_VENUE",
     } as const;
 
+    const savedPhone =
+      typeof window !== "undefined"
+        ? localStorage.getItem("spacehub_user_phone")
+        : null;
+    const savedName =
+      typeof window !== "undefined"
+        ? localStorage.getItem("spacehub_user_name")
+        : null;
+
+    if (savedPhone) {
+      document.cookie = `spacehub_user_phone=${encodeURIComponent(savedPhone)}; path=/; max-age=31536000; SameSite=Lax`;
+    }
+
     try {
       const res = await fetch("/api/bookings/confirm", {
         method: "POST",
@@ -80,6 +93,8 @@ export default function CheckoutPage({
           bookingId,
           provider: providerMap[paymentMethod],
           idempotencyKey: `idem-${bookingId}-${Date.now()}`,
+          customerPhone: savedPhone || "+998 90 123 45 67",
+          customerName: savedName || "Mijoz",
         }),
       });
 

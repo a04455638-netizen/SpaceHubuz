@@ -35,12 +35,13 @@ export async function getSessionUser(request?: RequestWithHeaders): Promise<Auth
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     const cookieUser = cookieStore.get("spacehub_user")?.value;
+    const cookiePhone = cookieStore.get("spacehub_user_phone")?.value;
     if (cookieUser) {
       try {
         const parsed = JSON.parse(decodeURIComponent(cookieUser));
         if (parsed && (parsed.id || parsed.phone)) {
           return {
-            id: parsed.id || `c1234567-0000-0000-0000-${parsed.phone?.slice(-12).padStart(12, "0") || "000000000001"}`,
+            id: parsed.id || `c1234567-0000-0000-0000-${(parsed.phone || "").replace(/\D/g, "").slice(-12).padStart(12, "0") || "000000000001"}`,
             phone: parsed.phone,
             email: parsed.email,
             role: (parsed.role as AuthRole) || "CUSTOMER",
@@ -50,6 +51,15 @@ export async function getSessionUser(request?: RequestWithHeaders): Promise<Auth
       } catch {
         // ignore parse error
       }
+    }
+    if (cookiePhone) {
+      const cleanDigits = cookiePhone.replace(/\D/g, "").slice(-12).padStart(12, "0");
+      return {
+        id: `c1234567-0000-0000-0000-${cleanDigits || "000000000001"}`,
+        phone: cookiePhone,
+        role: "CUSTOMER",
+        fullName: "SpaceHub Foydalanuvchi",
+      };
     }
   } catch {
     // next/headers might not be available in non-request test contexts

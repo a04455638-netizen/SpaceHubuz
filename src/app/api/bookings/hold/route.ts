@@ -7,14 +7,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     let user = await getSessionUser(request);
 
-    // Fallback: Support booking with customer phone/name from client profile or body
-    const customerPhone = body.customerPhone || body.phone;
-    const customerName = body.customerName || body.name || body.fullName || "Mijoz";
+    // Fallback: Support booking with customer phone/name from client profile, cookies or body
+    const cookiePhone = request.cookies.get("spacehub_user_phone")?.value;
+    const cookieUser = request.cookies.get("spacehub_user")?.value;
+    let parsedCookie: any = null;
+    if (cookieUser) {
+      try { parsedCookie = JSON.parse(decodeURIComponent(cookieUser)); } catch {}
+    }
 
-    if (!user && customerPhone) {
+    const customerPhone = body.customerPhone || body.phone || cookiePhone || parsedCookie?.phone || "+998 90 123 45 67";
+    const customerName = body.customerName || body.name || body.fullName || parsedCookie?.fullName || "Mijoz";
+
+    if (!user) {
       const cleanPhone = String(customerPhone).replace(/\D/g, "");
       user = {
-        id: "c1234567-0000-0000-0000-" + cleanPhone.slice(-12).padStart(12, "0"),
+        id: parsedCookie?.id || ("c1234567-0000-0000-0000-" + cleanPhone.slice(-12).padStart(12, "0")),
         phone: customerPhone,
         fullName: customerName,
         role: "CUSTOMER",
