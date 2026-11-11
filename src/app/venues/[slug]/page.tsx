@@ -20,6 +20,7 @@ import {
 import { findPublicVenue } from "../../../server/public-venues";
 import { CURATED_VENUES } from "../../../server/mock-venues";
 import { MapWrapper } from "@/components/map/map-wrapper";
+import { VenueReviewsSection } from "@/components/venue/venue-reviews-section";
 import { formatPrice } from "@/lib/format-price";
 import { getTranslation, type Locale } from "@/lib/i18n";
 
@@ -320,6 +321,13 @@ export default async function VenuePage({
               </a>
             </div>
           </div>
+
+          {/* Customer Reviews & Ratings Section */}
+          <VenueReviewsSection
+            venueId={venue.id}
+            venueName={venue.name}
+            locale={locale}
+          />
         </div>
 
         {/* Right Sticky Booking Box */}

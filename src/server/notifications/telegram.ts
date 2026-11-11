@@ -103,3 +103,72 @@ ${payload.paymentMethod ? `<b>To'lov usuli:</b> <code>${payload.paymentMethod}</
 
   return sendTelegramAlert(html, { parseMode: "HTML" });
 }
+
+export interface ReviewTelegramPayload {
+  reviewId: string;
+  venueName: string;
+  customerName: string;
+  rating: number;
+  comment: string;
+  submittedAt?: string;
+  status?: string;
+  adminReviewUrl?: string;
+}
+
+const sentReviewNotifications = new Set<string>();
+
+export async function notifyReviewTelegram(
+  payload: ReviewTelegramPayload
+): Promise<TelegramAlertResult> {
+  // Deduplication check: prevent duplicate notifications
+  if (sentReviewNotifications.has(payload.reviewId)) {
+    console.log(`[TELEGRAM REVIEW NOTIFICATION] Duplicate suppressed for reviewId: ${payload.reviewId}`);
+    return {
+      success: true,
+      simulated: true,
+      error: "DUPLICATE_NOTIFICATION_SUPPRESSED",
+    };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const adminUrl = payload.adminReviewUrl || `${appUrl}/admin/moderation`;
+  const submittedTime =
+    payload.submittedAt ||
+    new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+  const stars = "⭐".repeat(Math.max(1, Math.min(5, Math.round(payload.rating))));
+
+  const html = `
+<b>⭐ NEW CUSTOMER REVIEW / YANGI MIJOZ SHARHI</b>
+━━━━━━━━━━━━━━━━━━
+🏢 <b>Venue:</b> ${payload.venueName}
+👤 <b>Customer:</b> ${payload.customerName}
+⭐ <b>Rating:</b> ${payload.rating}/5 ${stars}
+
+💬 <b>Review:</b>
+<i>"${payload.comment.replace(/[<>]/g, "")}"</i>
+
+🕒 <b>Submitted:</b> ${submittedTime}
+📌 <b>Status:</b> <code>${payload.status || "Pending moderation"}</code>
+━━━━━━━━━━━━━━━━━━
+🔗 <a href="${adminUrl}">Admin tekshiruv paneliga o'tish (Review moderation)</a>
+`.trim();
+
+  // Primary delivery attempt
+  let result = await sendTelegramAlert(html, { parseMode: "HTML" });
+
+  // Retry once if temporarily failed on network error
+  if (!result.success && !result.simulated) {
+    try {
+      await new Promise((r) => setTimeout(r, 600));
+      result = await sendTelegramAlert(html, { parseMode: "HTML" });
+    } catch {
+      // ignore
+    }
+  }
+
+  if (result.success) {
+    sentReviewNotifications.add(payload.reviewId);
+  }
+
+  return result;
+}

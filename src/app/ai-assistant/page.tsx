@@ -2,19 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, Send, Bot, User, ArrowRight } from "lucide-react";
+import {
+  Sparkles,
+  Send,
+  Bot,
+  User,
+  ArrowRight,
+  MapPin,
+  Calendar,
+  Star,
+  CheckCircle,
+  ExternalLink,
+} from "lucide-react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useI18n } from "../../lib/i18n";
+import type { SuggestedVenueCard } from "../../server/ai/concierge";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
-  venues?: Array<{
-    name: string;
-    slug: string;
-    city: string;
-    address: string;
-  }>;
+  venues?: SuggestedVenueCard[];
 }
 
 export default function AiAssistantPage() {
@@ -154,25 +162,140 @@ export default function AiAssistantPage() {
                   <div className="whitespace-pre-line">{msg.content}</div>
 
                   {msg.venues && msg.venues.length > 0 && (
-                    <div className="mt-3 space-y-2 border-t border-border pt-3">
-                      <p className="text-xs font-bold text-accent">
-                        {locale === "ru" ? "Рекомендуемые площадки:" : locale === "en" ? "Recommended venues:" : "Tavsiya etilgan joylar:"}
+                    <div className="mt-4 space-y-3 border-t border-border pt-3">
+                      <p className="text-xs font-black uppercase tracking-wider text-accent">
+                        {locale === "ru"
+                          ? "🎯 Рекомендуемые площадки:"
+                          : locale === "en"
+                          ? "🎯 Recommended venues:"
+                          : "🎯 Tavsiya etilgan joylar:"}
                       </p>
-                      {msg.venues.map((v) => (
-                        <Link
-                          key={v.slug}
-                          href={`/venues/${v.slug}`}
-                          className="flex items-center justify-between rounded-lg bg-surface-card p-2 text-xs font-semibold text-ink transition hover:shadow border border-border"
-                        >
-                          <div>
-                            <p className="font-bold">{v.name}</p>
-                            <p className="text-ink-subtle">
-                              {v.city} &middot; {v.address}
-                            </p>
+                      <div className="grid grid-cols-1 gap-3">
+                        {msg.venues.map((v) => (
+                          <div
+                            key={v.slug}
+                            className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-sm hover:border-accent/40 transition-all text-ink"
+                          >
+                            <div className="flex flex-col sm:flex-row">
+                              {/* Venue Image */}
+                              <div className="relative h-44 sm:h-auto sm:w-48 shrink-0 overflow-hidden bg-surface-muted">
+                                {v.image ? (
+                                  <img
+                                    src={v.image}
+                                    alt={v.name}
+                                    className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                                  />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center bg-accent-subtle text-accent text-xs font-bold">
+                                    SpaceHub UZ
+                                  </div>
+                                )}
+                                <span className="absolute left-2 top-2 rounded-lg bg-black/70 backdrop-blur-md px-2 py-0.5 text-[10px] font-bold text-white">
+                                  {v.categoryLabel}
+                                </span>
+                              </div>
+
+                              {/* Venue Details */}
+                              <div className="flex flex-1 flex-col justify-between p-4 space-y-3">
+                                <div>
+                                  <div className="flex items-start justify-between gap-2">
+                                    <h4 className="text-sm font-black text-ink hover:text-accent">
+                                      <Link href={`/venues/${v.slug}`}>{v.name}</Link>
+                                    </h4>
+                                    <div className="flex items-center gap-1 rounded-lg bg-amber-500/10 px-2 py-0.5 text-xs font-bold text-amber-600 shrink-0">
+                                      <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                                      <span>{v.rating}</span>
+                                      <span className="text-[10px] text-ink-muted">({v.reviewCount})</span>
+                                    </div>
+                                  </div>
+
+                                  <p className="mt-1 flex items-center gap-1 text-[11px] text-ink-muted">
+                                    <MapPin className="h-3 w-3 text-accent shrink-0" />
+                                    <span>{v.address}</span>
+                                  </p>
+
+                                  <p className="mt-2 text-xs text-ink-muted line-clamp-2 leading-relaxed">
+                                    {v.description}
+                                  </p>
+
+                                  {/* Facilities */}
+                                  {v.amenities && v.amenities.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                      {v.amenities.map((am, i) => (
+                                        <span
+                                          key={i}
+                                          className="inline-flex items-center gap-1 rounded-md bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-ink-subtle"
+                                        >
+                                          <CheckCircle className="h-2.5 w-2.5 text-status-success" />
+                                          {am}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Price and Action Buttons */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-border pt-3">
+                                  <div>
+                                    <span className="text-base font-extrabold text-accent">
+                                      {v.priceFormatted}
+                                    </span>
+                                    <span className="text-[11px] text-ink-muted">
+                                      {" "}
+                                      / {locale === "ru" ? "час" : locale === "en" ? "hour" : "soat"}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <Link
+                                      href={`/map?venue=${v.slug}`}
+                                      className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface px-3 py-1.5 text-[11px] font-bold text-ink hover:bg-surface-muted transition"
+                                    >
+                                      <MapPin className="h-3 w-3 text-accent" />
+                                      <span>
+                                        {locale === "ru"
+                                          ? "На карте"
+                                          : locale === "en"
+                                          ? "Map"
+                                          : "Xaritada"}
+                                      </span>
+                                    </Link>
+                                    <Link
+                                      href={`/venues/${v.slug}`}
+                                      className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface px-3 py-1.5 text-[11px] font-bold text-ink hover:bg-surface-muted transition"
+                                    >
+                                      <span>
+                                        {locale === "ru"
+                                          ? "Детали"
+                                          : locale === "en"
+                                          ? "Details"
+                                          : "Batafsil"}
+                                      </span>
+                                    </Link>
+                                    <Link
+                                      href={
+                                        v.bookingResourceId
+                                          ? `/booking/${v.bookingResourceId}`
+                                          : `/venues/${v.slug}`
+                                      }
+                                      className="inline-flex items-center gap-1 rounded-xl bg-accent px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm hover:bg-accent-hover transition"
+                                    >
+                                      <Calendar className="h-3 w-3" />
+                                      <span>
+                                        {locale === "ru"
+                                          ? "Забронировать"
+                                          : locale === "en"
+                                          ? "Book Now"
+                                          : "Band qilish"}
+                                      </span>
+                                    </Link>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <ArrowRight className="h-4 w-4 text-accent" />
-                        </Link>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

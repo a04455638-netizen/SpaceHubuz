@@ -5,6 +5,7 @@ import { Navbar } from "../components/layout/navbar";
 import { Footer } from "../components/layout/footer";
 import { FloatingConcierge } from "../components/ai/floating-concierge";
 import { WelcomePhoneModal } from "../components/auth/welcome-phone-modal";
+import { MaintenanceGuard } from "../components/layout/maintenance-guard";
 import { I18nProvider, type Locale } from "../lib/i18n";
 import "./globals.css";
 
@@ -58,6 +59,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         suppressHydrationWarning
       >
         <I18nProvider initialLocale={initialLocale}>
+          <MaintenanceGuard />
           <Navbar />
           <div className="flex-1">{children}</div>
           <Footer />
