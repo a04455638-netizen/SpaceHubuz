@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ShieldCheck, MapPin } from "lucide-react";
+import { useI18n } from "../../lib/i18n";
 
 export function Footer() {
+  const { t } = useI18n();
+
   return (
     <footer className="border-t border-border bg-surface-subtle transition-colors">
       <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 lg:py-16">
@@ -15,13 +20,18 @@ export function Footer() {
                 alt="SpaceHub UZ"
                 width={160}
                 height={38}
-                className="h-8 w-auto"
+                className="h-8 w-auto dark:hidden"
+              />
+              <Image
+                src="/brand/logo-dark.svg"
+                alt="SpaceHub UZ"
+                width={160}
+                height={38}
+                className="h-8 w-auto hidden dark:block"
               />
             </Link>
             <p className="mt-4 max-w-sm text-sm text-ink-muted leading-relaxed">
-              O‘zbekiston bo‘ylab kovorkinglar, zamonaviy sport maydonlari,
-              konferensiya va tadbir joylarini tez, qulay va ishonchli bron
-              qilish platformasi.
+              {t.footer.description}
             </p>
             <div className="mt-4 flex items-center gap-2 text-xs font-medium text-ink-muted">
               <ShieldCheck className="h-4 w-4 text-accent" />
@@ -32,7 +42,7 @@ export function Footer() {
           {/* Categories */}
           <div>
             <h3 className="text-sm font-bold text-ink tracking-wider uppercase">
-              Toifalar
+              {t.explore.category}
             </h3>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
@@ -40,7 +50,7 @@ export function Footer() {
                   href="/explore/coworking"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Kovorking va o‘qish
+                  {t.categories.work}
                 </Link>
               </li>
               <li>
@@ -48,7 +58,7 @@ export function Footer() {
                   href="/explore/sports"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Sport maydonlari
+                  {t.categories.sports}
                 </Link>
               </li>
               <li>
@@ -56,7 +66,7 @@ export function Footer() {
                   href="/explore/meetings"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Majlis va trening xonalari
+                  {t.categories.meetings}
                 </Link>
               </li>
               <li>
@@ -64,7 +74,7 @@ export function Footer() {
                   href="/explore/events"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Tadbir va bayram zallari
+                  {t.categories.events}
                 </Link>
               </li>
             </ul>
@@ -73,7 +83,7 @@ export function Footer() {
           {/* Quick Links */}
           <div>
             <h3 className="text-sm font-bold text-ink tracking-wider uppercase">
-              Xizmatlar
+              {t.footer.forCustomers}
             </h3>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
@@ -81,7 +91,7 @@ export function Footer() {
                   href="/explore"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Katalog
+                  {t.nav.explore}
                 </Link>
               </li>
               <li>
@@ -89,7 +99,7 @@ export function Footer() {
                   href="/map"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Xarita orqali qidirish
+                  {t.nav.map}
                 </Link>
               </li>
               <li>
@@ -97,7 +107,7 @@ export function Footer() {
                   href="/compare"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Joy taqqoslash
+                  {t.nav.compare}
                 </Link>
               </li>
               <li>
@@ -105,7 +115,7 @@ export function Footer() {
                   href="/ai-assistant"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  AI Konsyerj yordamchi
+                  {t.nav.aiAssistant}
                 </Link>
               </li>
               <li>
@@ -113,7 +123,7 @@ export function Footer() {
                   href="/owner/dashboard"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Joy egalari uchun portal
+                  {t.footer.forOwners}
                 </Link>
               </li>
             </ul>
@@ -122,7 +132,7 @@ export function Footer() {
           {/* Help & Contact */}
           <div>
             <h3 className="text-sm font-bold text-ink tracking-wider uppercase">
-              Yordam va Aloqa
+              {t.footer.legal} &amp; {t.footer.support}
             </h3>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
@@ -130,7 +140,7 @@ export function Footer() {
                   href="/support"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Qo‘llab-quvvatlash / FAQ
+                  {t.footer.support} / FAQ
                 </Link>
               </li>
               <li>
@@ -138,7 +148,7 @@ export function Footer() {
                   href="/about"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Biz haqimizda
+                  SpaceHub Haqida
                 </Link>
               </li>
               <li>
@@ -146,7 +156,7 @@ export function Footer() {
                   href="/legal/privacy"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Maxfiylik siyosati
+                  {t.footer.privacy}
                 </Link>
               </li>
               <li>
@@ -154,7 +164,7 @@ export function Footer() {
                   href="/legal/terms"
                   className="text-ink-muted hover:text-accent transition"
                 >
-                  Foydalanish shartlari
+                  {t.footer.terms}
                 </Link>
               </li>
             </ul>
@@ -164,15 +174,13 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between border-t border-border pt-6 sm:flex-row">
           <p className="text-xs text-ink-muted">
-            &copy; {new Date().getFullYear()} SpaceHub UZ. Barcha huquqlar
-            himoyalangan.
+            &copy; {new Date().getFullYear()} SpaceHub UZ. {t.footer.rights}
           </p>
           <div className="mt-3 flex items-center gap-4 text-xs text-ink-muted sm:mt-0">
             <span className="flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 text-accent" /> Toshkent,
-              O‘zbekiston
+              <MapPin className="h-3.5 w-3.5 text-accent" /> Toshkent, O&apos;zbekiston
             </span>
-            <span>·</span>
+            <span>&middot;</span>
             <span>Asia/Tashkent (UTC+5)</span>
           </div>
         </div>

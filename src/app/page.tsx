@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   Search,
   MapPin,
@@ -8,123 +12,108 @@ import {
   ArrowRight,
   Sparkles,
   Award,
+  Star,
+  Bot,
+  Zap,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n/context";
+import { CURATED_VENUES } from "@/server/mock-venues";
 
 export default function Home() {
-  const primaryCategories = [
+  const { t, locale } = useI18n();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
+  const categories = [
     {
-      id: "work",
+      id: "coworking",
       slug: "coworking",
-      name: "Kovorking va o‘qish",
-      desc: "Sokin ish stollari, shaxsiy ofislar va o‘quv xonalari",
-      banner: "/images/generated/banner-coworking.svg",
-      count: "120+ joy",
+      name: t.categories.work,
+      desc: t.categories.workDesc,
+      image:
+        "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
+      count: "120+ spaces",
     },
     {
       id: "sports",
       slug: "sports",
-      name: "Sport maydonlari",
-      desc: "Futsal, tennis, padel kortlari va zamonaviy trenajyor zallari",
-      banner: "/images/generated/banner-sports.svg",
-      count: "85+ maydon",
+      name: t.categories.sports,
+      desc: t.categories.sportsDesc,
+      image:
+        "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+      count: "85+ arenas",
     },
     {
       id: "meetings",
       slug: "meetings",
-      name: "Majlis va konferensiya",
-      desc: "Proyektor, audio tizim va tezkor internetli uchrashuv xonalari",
-      banner: "/images/generated/banner-meetings.svg",
-      count: "95+ xona",
+      name: t.categories.meetings,
+      desc: t.categories.meetingsDesc,
+      image:
+        "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=800&q=80",
+      count: "95+ halls",
     },
     {
       id: "events",
       slug: "events",
-      name: "Tadbir va bayram zallari",
-      desc: "Keng zallar, seminarlar va tantanalar uchun maxsus maydonlar",
-      banner: "/images/generated/banner-events.svg",
-      count: "40+ zal",
+      name: t.categories.events,
+      desc: t.categories.eventsDesc,
+      image:
+        "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80",
+      count: "40+ venues",
     },
   ];
 
-  const featuredVenues = [
-    {
-      slug: "c-space-mirabad",
-      name: "C-Space Mirabad Workspace",
-      category: "Kovorking",
-      city: "Toshkent",
-      district: "Mirobod tumani",
-      price: "45 000 so‘m",
-      image: "/images/generated/demo-coworking-1.svg",
-      rating: "4.9",
-      reviews: 28,
-    },
-    {
-      slug: "milliy-futsal-arena",
-      name: "Milliy Futsal & Padel Arena",
-      category: "Sport maydoni",
-      city: "Toshkent",
-      district: "Chilonzor tumani",
-      price: "180 000 so‘m",
-      image: "/images/generated/demo-sports-1.svg",
-      rating: "4.8",
-      reviews: 42,
-    },
-    {
-      slug: "techpark-conference-hall",
-      name: "TechPark Grand Conference Hall",
-      category: "Konferensiya",
-      city: "Toshkent",
-      district: "Yashnobod tumani",
-      price: "350 000 so‘m",
-      image: "/images/generated/demo-meetings-1.svg",
-      rating: "5.0",
-      reviews: 19,
-    },
-    {
-      slug: "registan-event-pavilion",
-      name: "Registon Luxury Event Pavilion",
-      category: "Tadbir zali",
-      city: "Samarqand",
-      district: "Markaz",
-      price: "1 200 000 so‘m",
-      image: "/images/generated/demo-events-1.svg",
-      rating: "4.9",
-      reviews: 35,
-    },
+  const featuredVenues = CURATED_VENUES.slice(0, 4);
+
+  const stats = [
+    { value: "150+", label: t.hero.statsVenues },
+    { value: "12 000+", label: t.hero.statsBookings },
+    { value: "4.9★", label: t.hero.statsRating },
+    { value: "5", label: t.hero.statsCities },
   ];
 
   return (
-    <main>
+    <main className="min-h-screen bg-surface">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-ink py-16 sm:py-24 text-white">
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
+      <section className="relative overflow-hidden bg-ink py-20 sm:py-28 text-white">
+        <div className="absolute inset-0 opacity-25 pointer-events-none">
           <Image
-            src="/images/generated/hero-banner.svg"
-            alt="SpaceHub Architecture Background"
+            src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1920&q=80"
+            alt="SpaceHub Modern Spaces"
             fill
             className="object-cover object-center"
             priority
           />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/90 via-ink/80 to-ink" />
         </div>
+
         <div className="relative mx-auto max-w-7xl px-5 sm:px-6">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-accent/20 px-3.5 py-1.5 text-xs font-semibold text-emerald-300 ring-1 ring-inset ring-accent/40">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-3xl"
+          >
+            <span className="inline-flex items-center gap-2 rounded-full bg-accent/20 px-3.5 py-1.5 text-xs font-semibold text-emerald-300 ring-1 ring-inset ring-accent/40 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5" />
-              O‘zbekistonning #1 Joylar Agregatori
+              {t.hero.badge}
             </span>
-            <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-6xl text-white">
-              Kerakli joyni toping va{" "}
-              <span className="text-emerald-400">aniq vaqtga</span> band qiling.
+            <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-6xl text-white leading-tight">
+              {t.hero.title}
             </h1>
             <p className="mt-5 text-lg text-emerald-100/90 leading-relaxed max-w-2xl">
-              Futsal maydoni, sokin ish joyi yoki 50 kishilik konferensiya zali.
-              Oraliqlar real vaqtda bazadan tekshiriladi va ikki mijoz bir
-              vaqtda band qila olmaydi.
+              {t.hero.subtitle}
             </p>
-          </div>
+          </motion.div>
 
           {/* Search Box */}
-          <div className="mt-10 rounded-2xl bg-surface-card p-4 sm:p-5 shadow-2xl ring-1 ring-border text-ink">
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="mt-10 rounded-2xl bg-surface-card p-4 sm:p-5 shadow-2xl ring-1 ring-border text-ink"
+          >
             <form
               action="/explore"
               method="GET"
@@ -132,49 +121,54 @@ export default function Home() {
             >
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
-                  Joy yoki xizmat nomi
+                  {t.hero.searchVenue}
                 </label>
                 <div className="relative mt-1.5">
                   <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-subtle" />
                   <input
                     type="search"
                     name="q"
-                    placeholder="Masalan, futsal yoki kovorking"
-                    className="w-full rounded-xl border border-border bg-surface px-9 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t.common.searchPlaceholder}
+                    className="w-full rounded-xl border border-border bg-surface px-9 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
-                  Toifa
+                  {t.explore.category}
                 </label>
                 <div className="relative mt-1.5">
                   <select
                     name="category"
-                    defaultValue=""
-                    className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition"
                   >
-                    <option value="">Barcha toifalar</option>
-                    <option value="work">Ish va o‘qish</option>
-                    <option value="sports">Sport maydonlari</option>
-                    <option value="meetings">Majlis va trening</option>
-                    <option value="events">Tadbir joylari</option>
+                    <option value="">{t.categories.all}</option>
+                    <option value="coworking">{t.categories.work}</option>
+                    <option value="sports">{t.categories.sports}</option>
+                    <option value="meetings">{t.categories.meetings}</option>
+                    <option value="events">{t.categories.events}</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
-                  Shahar / Tuman
+                  {t.explore.city}
                 </label>
                 <div className="relative mt-1.5">
                   <MapPin className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-subtle" />
                   <input
                     type="text"
                     name="city"
+                    value={selectedCity}
+                    onChange={(e) => setSelectedCity(e.target.value)}
                     placeholder="Toshkent, Samarqand…"
-                    className="w-full rounded-xl border border-border bg-surface px-9 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    className="w-full rounded-xl border border-border bg-surface px-9 py-2.5 text-sm text-ink placeholder:text-ink-subtle focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition"
                   />
                 </div>
               </div>
@@ -182,14 +176,31 @@ export default function Home() {
               <div>
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-accent-hover"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-accent-hover active:scale-[0.98]"
                 >
                   <Search className="h-4 w-4" />
-                  <span>Qidirish</span>
+                  <span>{t.common.search}</span>
                 </button>
               </div>
             </form>
-          </div>
+          </motion.div>
+
+          {/* Stats Bar */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 border-t border-white/10 pt-8"
+          >
+            {stats.map((s, idx) => (
+              <div key={idx} className="text-center sm:text-left">
+                <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400">
+                  {s.value}
+                </p>
+                <p className="mt-1 text-xs text-emerald-100/70">{s.label}</p>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
@@ -198,98 +209,129 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              Asosiy toifalar
+              {locale === "uz"
+                ? "Asosiy toifalar"
+                : locale === "ru"
+                  ? "Основные категории"
+                  : "Explore by Category"}
             </h2>
             <p className="mt-2 text-sm text-ink-muted">
-              Ehtiyojingizga mos joy toifasini tanlang va bo‘sh soatlarni
-              ko‘ring
+              {locale === "uz"
+                ? "Ehtiyojingizga mos joy toifasini tanlang va bo‘sh soatlarni ko‘ring"
+                : locale === "ru"
+                  ? "Выберите категорию и найдите свободные интервалы"
+                  : "Find the perfect space tailored to your needs"}
             </p>
           </div>
           <Link
             href="/explore"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
           >
-            Barcha 22 toifani ko‘rish
+            {t.common.viewAll}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {primaryCategories.map((cat) => (
-            <Link
+          {categories.map((cat, idx) => (
+            <motion.div
               key={cat.id}
-              href={`/explore/${cat.slug}`}
-              className="group relative overflow-hidden rounded-2xl border border-border bg-surface-card p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: idx * 0.08 }}
             >
-              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-surface-muted">
-                <Image
-                  src={cat.banner}
-                  alt={cat.name}
-                  fill
-                  className="object-cover transition duration-300 group-hover:scale-105"
-                />
-              </div>
-              <div className="mt-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-ink group-hover:text-accent transition">
-                    {cat.name}
-                  </h3>
-                  <span className="text-xs font-semibold text-accent">
+              <Link
+                href={`/explore/${cat.slug}`}
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface-card p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-surface-muted">
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    className="object-cover transition duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <span className="absolute bottom-2.5 left-2.5 rounded-lg bg-black/60 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
                     {cat.count}
                   </span>
                 </div>
-                <p className="mt-1.5 text-xs text-ink-muted line-clamp-2">
-                  {cat.desc}
-                </p>
-              </div>
-            </Link>
+                <div className="mt-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-base font-bold text-ink group-hover:text-accent transition">
+                      {cat.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-ink-muted line-clamp-2">
+                      {cat.desc}
+                    </p>
+                  </div>
+                  <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-accent">
+                    <span>{t.common.viewDetails}</span>
+                    <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Featured Listings */}
-      <section className="bg-surface-subtle py-16">
+      {/* Featured Venues Section */}
+      <section className="bg-surface-subtle py-16 border-y border-border">
         <div className="mx-auto max-w-7xl px-5 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-accent">
-                Tavsiya etiladigan joylar
+                {locale === "uz"
+                  ? "Tavsiya etiladigan joylar"
+                  : locale === "ru"
+                    ? "Рекомендуемые пространства"
+                    : "Featured Spaces"}
               </span>
               <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                Ommabop va tasdiqlangan obyektlar
+                {locale === "uz"
+                  ? "Ommabop va tasdiqlangan obyektlar"
+                  : locale === "ru"
+                    ? "Популярные проверенные объекты"
+                    : "Popular Verified Venues"}
               </h2>
             </div>
             <Link
               href="/explore"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
             >
-              Katalogda ko‘rish
+              {t.common.viewAll}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredVenues.map((venue) => (
-              <div
-                key={venue.slug}
-                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface-card transition duration-200 hover:shadow-lg"
+            {featuredVenues.map((venue, idx) => (
+              <motion.div
+                key={venue.id}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: idx * 0.08 }}
+                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-surface-card transition duration-200 hover:shadow-lg hover:-translate-y-0.5"
               >
                 <div>
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-muted">
                     <Image
-                      src={venue.image}
+                      src={venue.featuredImage}
                       alt={venue.name}
                       fill
                       className="object-cover transition duration-300 group-hover:scale-105"
                     />
                     <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                      {venue.category}
+                      {venue.categoryName[locale]}
                     </span>
                   </div>
                   <div className="p-4">
                     <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-                      <MapPin className="h-3.5 w-3.5 text-accent" />
-                      <span>
+                      <MapPin className="h-3.5 w-3.5 text-accent shrink-0" />
+                      <span className="truncate">
                         {venue.city}, {venue.district}
                       </span>
                     </div>
@@ -297,9 +339,10 @@ export default function Home() {
                       {venue.name}
                     </h3>
                     <div className="mt-2 flex items-center gap-1 text-xs text-amber-500 font-semibold">
-                      <span>★ {venue.rating}</span>
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                      <span>{venue.rating.toFixed(1)}</span>
                       <span className="text-ink-subtle">
-                        ({venue.reviews} sharh)
+                        ({venue.reviewCount} {t.venueDetail.reviews.toLowerCase()})
                       </span>
                     </div>
                   </div>
@@ -308,67 +351,131 @@ export default function Home() {
                 <div className="flex items-center justify-between border-t border-border p-4 bg-surface-card">
                   <div>
                     <span className="text-xs text-ink-subtle">
-                      Boshlanish narxi:
+                      {locale === "uz" ? "Narxi:" : locale === "ru" ? "Цена:" : "From:"}
                     </span>
                     <p className="text-sm font-extrabold text-ink">
-                      {venue.price}{" "}
+                      {venue.pricePerHour.toLocaleString("uz-UZ")} {t.common.currency}
                       <span className="text-xs font-normal text-ink-muted">
-                        / soat
+                        {" "}/ {locale === "uz" ? "soat" : locale === "ru" ? "час" : "hour"}
                       </span>
                     </p>
                   </div>
                   <Link
                     href={`/venues/${venue.slug}`}
-                    className="rounded-lg bg-accent px-3 py-1.5 text-xs font-bold text-white transition hover:bg-accent-hover"
+                    className="rounded-lg bg-accent px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-accent-hover shadow-sm"
                   >
-                    Band qilish
+                    {t.common.bookNow}
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* AI Assistant Teaser Banner */}
+      <section className="mx-auto max-w-7xl px-5 py-12 sm:px-6">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700 p-8 sm:p-12 text-white shadow-xl">
+          <div className="relative z-10 max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
+              <Bot className="h-4 w-4" />
+              {locale === "uz" ? "Sun'iy Intellekt Maslahatchisi" : locale === "ru" ? "ИИ-Консьерж" : "AI Space Concierge"}
+            </span>
+            <h3 className="mt-4 text-2xl sm:text-3xl font-extrabold tracking-tight">
+              {locale === "uz"
+                ? "Kerakli joyni bir necha soniyada toping"
+                : locale === "ru"
+                  ? "Найдите идеальное место за считанные секунды"
+                  : "Find your ideal space in seconds with AI"}
+            </h3>
+            <p className="mt-3 text-sm sm:text-base text-emerald-100/90 leading-relaxed">
+              {locale === "uz"
+                ? "SpaceHub AI maslahatchisi sizning byudjetingiz, joylashuvingiz va talablaringizga mos joylarni tahlil qilib, eng maqbul variantlarni tavsiya qiladi."
+                : locale === "ru"
+                  ? "Наш умный помощник проанализирует ваши пожелания по бюджету, району и вместимости и мгновенно подберет лучшие свободные варианты."
+                  : "Our intelligent assistant analyzes your budget, preferred district, and capacity to recommend the best available spaces instantly."}
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <Link
+                href="/ai-assistant"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-emerald-800 shadow-md transition hover:bg-emerald-50"
+              >
+                <Zap className="h-4 w-4 text-amber-500 fill-current" />
+                <span>{locale === "uz" ? "AI bilan maslahatlashish" : locale === "ru" ? "Спросить ИИ" : "Chat with AI"}</span>
+              </Link>
+              <Link
+                href="/map"
+                className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/20 transition"
+              >
+                <MapPin className="h-4 w-4" />
+                <span>{t.nav.map}</span>
+              </Link>
+            </div>
+          </div>
+          <div className="pointer-events-none absolute -right-10 -bottom-10 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        </div>
+      </section>
+
       {/* Trust & Guarantees */}
-      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-6">
+      <section className="mx-auto max-w-7xl px-5 py-12 pb-20 sm:px-6">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm transition hover:shadow-md">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-subtle text-accent">
               <ShieldCheck className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-ink">
-              Ikki tomonlama bandlikdan 100% himoya
+              {locale === "uz"
+                ? "Ikki tomonlama bandlikdan 100% himoya"
+                : locale === "ru"
+                  ? "100% защита от двойных бронирований"
+                  : "100% Double-Booking Protection"}
             </h3>
             <p className="mt-2 text-sm text-ink-muted leading-relaxed">
-              PostgreSQL exclusion constraint texnologiyasi orqali bir xil vaqt
-              oralig‘i ikki xaridorga aslo sotilmaydi.
+              {locale === "uz"
+                ? "PostgreSQL exclusion constraint texnologiyasi orqali bir xil vaqt oralig‘i ikki xaridorga aslo sotilmaydi."
+                : locale === "ru"
+                  ? "Специальные ограничения базы данных PostgreSQL гарантируют, что один и тот же интервал времени никогда не будет забронирован дважды."
+                  : "Database-level exclusion constraints guarantee that overlapping time slots cannot be booked by multiple customers simultaneously."}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm transition hover:shadow-md">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-subtle text-accent">
               <Clock className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-ink">
-              Onlayn Click &amp; Payme to‘lov
+              {locale === "uz"
+                ? "Onlayn Click & Payme to‘lov"
+                : locale === "ru"
+                  ? "Оплата через Click и Payme"
+                  : "Click & Payme Online Payments"}
             </h3>
             <p className="mt-2 text-sm text-ink-muted leading-relaxed">
-              O‘zbekistondagi milliy to‘lov tizimlari orqali tezkor va xavfsiz
-              to‘lang yoki joyida to‘lash imkoniyatidan foydalaning.
+              {locale === "uz"
+                ? "O‘zbekistondagi milliy to‘lov tizimlari orqali tezkor va xavfsiz to‘lang yoki joyida to‘lash imkoniyatidan foydalaning."
+                : locale === "ru"
+                  ? "Оплачивайте мгновенно и безопасно через национальные платежные системы или выберите оплату на месте."
+                  : "Pay securely and instantly via Uzbekistan's leading payment systems, or choose pay on arrival."}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm transition hover:shadow-md">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-subtle text-accent">
               <Award className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-ink">
-              Doimiy saqlanadigan buyurtmalar
+              {locale === "uz"
+                ? "Telegram xabarnomalar va QR chipta"
+                : locale === "ru"
+                  ? "Уведомления в Telegram и QR-билет"
+                  : "Telegram Alerts & QR Tickets"}
             </h3>
             <p className="mt-2 text-sm text-ink-muted leading-relaxed">
-              Saytdan chiqsangiz yoki boshqa qurilmadan kirsangiz ham barcha
-              buyurtmalaringiz, cheklaringiz va QR ruxsatnomangiz saqlanadi.
+              {locale === "uz"
+                ? "Har bir buyurtma darhol Telegram botingizga yuboriladi va shaxsiy kabinetingizda QR ruxsatnomasi saqlanadi."
+                : locale === "ru"
+                  ? "Каждый заказ сразу отправляется в ваш Telegram и сохраняется в личном кабинете с уникальным QR-кодом для входа."
+                  : "Every booking is instantly routed to your Telegram bot and stored in your profile with a verifiable check-in QR code."}
             </p>
           </div>
         </div>

@@ -84,3 +84,18 @@ The application operates with complete graceful fallbacks for local and developm
 - **Payments:** Click.uz (`CLICK_SERVICE_ID`, `CLICK_MERCHANT_ID`, `CLICK_SECRET_KEY`), Payme.uz (`PAYME_MERCHANT_ID`, `PAYME_SECRET_KEY`)
 - **Telegram Bot:** (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_ADMIN_CHAT_ID`)
 - **AI Concierge:** OpenAI (`OPENAI_API_KEY`, `OPENAI_MODEL`)
+
+---
+
+## 4. Critical Quality Upgrades (Production Polish)
+
+| Feature Area | Upgrade Implemented |
+|---|---|
+| **Realistic Photography** | Replaced demo vector SVGs across home, catalog, category, and venue pages with high-resolution, category-specific photography (Unsplash) representing authentic Tashkent coworking spaces, FIFA futsal arenas, Olympic tennis/padel clubs, executive conference rooms, and event pavilions. |
+| **Global i18n Localization** | Built reactive `I18nProvider` with persistent locale selection in `localStorage` and `cookie` (`spacehub_locale`). Comprehensive Uzbek (`uz`), Russian (`ru`), and English (`en`) dictionary covers Navbar, Footer, Hero, Search, Category Cards, Explore Filters, Venue Details, Interactive Map, and AI Concierge. |
+| **AI Concierge Multilingual Grounding** | Grounded system instructions in Uzbek, Russian, and English. AI detects the user's active locale and converses naturally with localized recommendations and graceful offline fallbacks. |
+| **Complete Dark Mode** | Refactored layouts to use semantic `bg-surface`, `bg-surface-card`, `text-ink`, and `border-border` tokens across all pages, eliminating unreadable white boxes in dark mode. |
+| **Real Interactive Map** | Integrated client Leaflet with OpenStreetMap tiles, custom CSS pin markers, venue popup previews with pricing and photos, category filter synchronization, and 1-click external navigation links for both Google Maps and Yandex Maps. |
+| **Telegram Order Notifications** | Added formatted HTML Telegram operational alerts on booking holds and payment confirmations with booking ID, customer info, venue name, address, time slot, and total UZS price. |
+| **Smooth Modern Animations** | Integrated Framer Motion across page transitions, card hover transforms, mobile menu drawer, and chat message lists. |
+

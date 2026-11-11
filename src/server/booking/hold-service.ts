@@ -1,5 +1,6 @@
 import { occupiesInventory, canTransition, type BookingStatusType } from "../../booking/state-machine.ts";
 import { logAuditEvent } from "../audit/audit-log.ts";
+import { notifyBookingTelegram } from "../notifications/telegram.ts";
 
 export interface CreateHoldParams {
   resourceId: string;
@@ -183,6 +184,21 @@ export async function createBookingHold(params: CreateHoldParams): Promise<Booki
         details: { startsAt: params.startsAt, endsAt: params.endsAt, totalAmount },
       });
 
+      await notifyBookingTelegram({
+        bookingId: result.booking?.id || "hold-id",
+        bookingNumber,
+        customerName: params.customerId,
+        customerPhone: "+998 90 123 45 67",
+        venueName: "SpaceHub UZ Hamkorlik Joyi",
+        venueCategory: "Kovorking / Sport / Majlis",
+        address: "Toshkent shahri",
+        date: start.toISOString().split("T")[0],
+        startTime: start.toISOString().slice(11, 16),
+        endTime: end.toISOString().slice(11, 16),
+        totalPrice: totalAmount,
+        status: "PENDING_PAYMENT (Vaqtinchalik hold)",
+      });
+
       return {
         success: true,
         bookingId: result.booking?.id,
@@ -245,6 +261,21 @@ export async function createBookingHold(params: CreateHoldParams): Promise<Booki
     expiresAt: expiresAt.toISOString(),
     qrCodeToken,
     createdAt: now.toISOString(),
+  });
+
+  await notifyBookingTelegram({
+    bookingId: sandboxId,
+    bookingNumber,
+    customerName: params.customerId,
+    customerPhone: "+998 90 123 45 67",
+    venueName: "SpaceHub UZ Hamkorlik Joyi",
+    venueCategory: "Kovorking / Sport / Majlis",
+    address: "Toshkent shahri",
+    date: start.toISOString().split("T")[0],
+    startTime: start.toISOString().slice(11, 16),
+    endTime: end.toISOString().slice(11, 16),
+    totalPrice: totalAmount,
+    status: "PENDING_PAYMENT (Vaqtinchalik hold)",
   });
 
   return {
@@ -331,6 +362,22 @@ export async function confirmBooking(params: ConfirmBookingParams): Promise<{ su
         details: { provider: params.provider, amount: booking.totalAmount },
       });
 
+      await notifyBookingTelegram({
+        bookingId: params.bookingId,
+        bookingNumber: booking.bookingNumber,
+        customerName: params.customerId,
+        customerPhone: "+998 90 123 45 67",
+        venueName: "SpaceHub UZ Tasdiqlangan Joy",
+        venueCategory: "Kovorking / Sport / Majlis",
+        address: "Toshkent shahri",
+        date: booking.startsAt.toISOString().split("T")[0],
+        startTime: booking.startsAt.toISOString().slice(11, 16),
+        endTime: booking.endsAt.toISOString().slice(11, 16),
+        totalPrice: booking.totalAmount,
+        status: "CONFIRMED (To'lov tasdiqlandi)",
+        paymentMethod: params.provider,
+      });
+
       return { success: true, message: "Bron muvaffaqiyatli tasdiqlandi!" };
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Error";
@@ -350,6 +397,23 @@ export async function confirmBooking(params: ConfirmBookingParams): Promise<{ su
   }
 
   sb.status = "CONFIRMED";
+
+  await notifyBookingTelegram({
+    bookingId: sb.id,
+    bookingNumber: sb.bookingNumber,
+    customerName: sb.customerId,
+    customerPhone: "+998 90 123 45 67",
+    venueName: "SpaceHub UZ Tasdiqlangan Joy",
+    venueCategory: "Kovorking / Sport / Majlis",
+    address: "Toshkent shahri",
+    date: sb.startsAt.split("T")[0],
+    startTime: sb.startsAt.slice(11, 16),
+    endTime: sb.endsAt.slice(11, 16),
+    totalPrice: sb.totalAmount,
+    status: "CONFIRMED (To'lov tasdiqlandi)",
+    paymentMethod: params.provider,
+  });
+
   return { success: true, message: "Bron muvaffaqiyatli tasdiqlandi!" };
 }
 

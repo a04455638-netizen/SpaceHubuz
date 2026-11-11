@@ -5,8 +5,12 @@ import {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { messages?: ConciergeMessage[] };
+    const body = (await request.json()) as {
+      messages?: ConciergeMessage[];
+      locale?: "uz" | "ru" | "en";
+    };
     const messages = body.messages;
+    const locale = body.locale || "uz";
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return Response.json(
@@ -15,7 +19,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await askConcierge(messages);
+    const response = await askConcierge(messages, undefined, locale);
     return Response.json(response);
   } catch {
     return Response.json({ error: "INTERNAL_AI_ERROR" }, { status: 500 });

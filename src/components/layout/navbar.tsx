@@ -17,12 +17,13 @@ import {
   Moon,
   Globe,
 } from "lucide-react";
-import { getTranslation, type Locale } from "../../lib/i18n";
+import { motion, AnimatePresence } from "framer-motion";
+import { useI18n, type Locale } from "../../lib/i18n";
 
 export function Navbar() {
+  const { locale, setLocale, t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [locale, setLocale] = useState<Locale>("uz");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -35,10 +36,6 @@ export function Navbar() {
           : "light");
       setTheme(savedTheme);
       document.documentElement.setAttribute("data-theme", savedTheme);
-
-      const savedLocale =
-        (localStorage.getItem("spacehub_locale") as Locale) || "uz";
-      setLocale(savedLocale);
     });
     return () => cancelAnimationFrame(frame);
   }, []);
@@ -49,13 +46,6 @@ export function Navbar() {
     localStorage.setItem("spacehub_theme", nextTheme);
     document.documentElement.setAttribute("data-theme", nextTheme);
   }
-
-  function changeLocale(nextLocale: Locale) {
-    setLocale(nextLocale);
-    localStorage.setItem("spacehub_locale", nextLocale);
-  }
-
-  const t = getTranslation(locale);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur-md transition-colors">
@@ -125,158 +115,156 @@ export function Navbar() {
             <Globe className="mr-1 h-3.5 w-3.5 text-ink-muted" />
             <select
               value={locale}
-              onChange={(e) => changeLocale(e.target.value as Locale)}
+              onChange={(e) => setLocale(e.target.value as Locale)}
               aria-label="Select language"
-              className="cursor-pointer bg-transparent outline-none"
+              className="cursor-pointer bg-transparent outline-none text-ink"
             >
-              <option value="uz">UZ</option>
-              <option value="ru">RU</option>
-              <option value="en">EN</option>
+              <option value="uz" className="bg-surface-card text-ink">O‘zbekcha</option>
+              <option value="ru" className="bg-surface-card text-ink">Русский</option>
+              <option value="en" className="bg-surface-card text-ink">English</option>
             </select>
           </div>
 
-          {/* Theme Toggle Button */}
+          {/* Theme Switcher Button */}
           <button
-            type="button"
             onClick={toggleTheme}
-            aria-label="Toggle dark/light theme"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-card text-ink transition hover:bg-surface-muted"
+            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface-card text-ink transition hover:bg-surface-muted cursor-pointer"
           >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4 text-warning" />
-            ) : (
+            {theme === "light" ? (
               <Moon className="h-4 w-4 text-ink-muted" />
+            ) : (
+              <Sun className="h-4 w-4 text-amber-400" />
             )}
           </button>
 
-          {/* Customer Bookings Shortcut */}
+          {/* User Profile / Login Link */}
           <Link
             href="/account/bookings"
-            aria-label={t.nav.myBookings}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-card text-ink transition hover:bg-surface-muted"
+            className="flex items-center gap-1.5 rounded-lg border border-border bg-surface-card px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-accent hover:text-accent"
           >
-            <Calendar className="h-4 w-4 text-ink-muted" />
+            <Calendar className="h-3.5 w-3.5 text-accent" />
+            <span className="hidden lg:inline">{t.nav.myBookings}</span>
           </Link>
 
-          {/* Account Profile / Login Button */}
           <Link
             href="/account/profile"
-            className="flex items-center gap-2 rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold text-ink-inverse shadow-sm transition hover:bg-accent-hover"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white shadow-sm transition hover:bg-accent-hover"
+            aria-label="Account Profile"
           >
             <User className="h-4 w-4" />
-            <span>{t.nav.profile}</span>
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu Hamburger Trigger */}
         <div className="flex items-center gap-2 sm:hidden">
           <button
-            type="button"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-card"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface-card text-ink"
           >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4 text-warning" />
-            ) : (
-              <Moon className="h-4 w-4 text-ink-muted" />
-            )}
+            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4 text-amber-400" />}
           </button>
           <button
-            type="button"
             onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle navigation menu"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface-card text-ink"
+            aria-label="Open mobile navigation"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface-card text-ink"
           >
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      {isOpen && (
-        <div className="border-b border-border bg-surface px-4 py-4 sm:hidden">
-          <nav className="flex flex-col gap-2">
-            <Link
-              href="/explore"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
-            >
-              <Compass className="h-4 w-4 text-accent" />
-              {t.nav.explore}
-            </Link>
-            <Link
-              href="/map"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
-            >
-              <MapPin className="h-4 w-4 text-accent" />
-              {t.nav.map}
-            </Link>
-            <Link
-              href="/compare"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
-            >
-              <GitCompare className="h-4 w-4 text-accent" />
-              {t.nav.compare}
-            </Link>
-            <Link
-              href="/ai-assistant"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 rounded-lg bg-accent-subtle px-3 py-2 text-sm font-semibold text-accent"
-            >
-              <Sparkles className="h-4 w-4" />
-              {t.nav.aiAssistant}
-            </Link>
-            <div className="my-2 border-t border-border" />
-            <Link
-              href="/account/bookings"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
-            >
-              <Calendar className="h-4 w-4 text-accent" />
-              {t.nav.myBookings}
-            </Link>
-            <Link
-              href="/account/favorites"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
-            >
-              <Heart className="h-4 w-4 text-accent" />
-              {t.nav.favorites}
-            </Link>
-            <Link
-              href="/account/profile"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
-            >
-              <User className="h-4 w-4 text-accent" />
-              {t.nav.profile}
-            </Link>
-            <div className="mt-3 flex items-center justify-between pt-2">
-              <span className="text-xs font-semibold text-ink-muted">
-                {t.common.language}:
-              </span>
-              <div className="flex gap-2">
-                {(["uz", "ru", "en"] as const).map((lang) => (
+      {/* Mobile Animated Dropdown Sheet */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-b border-border bg-surface px-4 py-4 sm:hidden space-y-3"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <span className="text-xs font-bold text-ink-muted">{t.common.language}</span>
+              <div className="flex gap-1.5">
+                {(["uz", "ru", "en"] as const).map((l) => (
                   <button
-                    key={lang}
-                    onClick={() => changeLocale(lang)}
-                    className={`rounded px-2.5 py-1 text-xs font-bold ${
-                      locale === lang
+                    key={l}
+                    onClick={() => setLocale(l)}
+                    className={`px-2.5 py-1 text-xs font-bold rounded-lg transition ${
+                      locale === l
                         ? "bg-accent text-white"
-                        : "border border-border text-ink"
+                        : "bg-surface-card border border-border text-ink"
                     }`}
                   >
-                    {lang.toUpperCase()}
+                    {l.toUpperCase()}
                   </button>
                 ))}
               </div>
             </div>
-          </nav>
-        </div>
-      )}
+
+            <nav className="flex flex-col space-y-2 pt-1">
+              <Link
+                href="/explore"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
+              >
+                <Compass className="h-4 w-4 text-accent" />
+                {t.nav.explore}
+              </Link>
+              <Link
+                href="/map"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
+              >
+                <MapPin className="h-4 w-4 text-accent" />
+                {t.nav.map}
+              </Link>
+              <Link
+                href="/compare"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
+              >
+                <GitCompare className="h-4 w-4 text-accent" />
+                {t.nav.compare}
+              </Link>
+              <Link
+                href="/ai-assistant"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg bg-accent-subtle px-3 py-2 text-sm font-bold text-accent"
+              >
+                <Sparkles className="h-4 w-4" />
+                {t.nav.aiAssistant}
+              </Link>
+              <Link
+                href="/account/bookings"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
+              >
+                <Calendar className="h-4 w-4 text-accent" />
+                {t.nav.myBookings}
+              </Link>
+              <Link
+                href="/account/favorites"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
+              >
+                <Heart className="h-4 w-4 text-accent" />
+                {t.nav.favorites}
+              </Link>
+              <Link
+                href="/account/profile"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
+              >
+                <User className="h-4 w-4 text-accent" />
+                {t.nav.profile}
+              </Link>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

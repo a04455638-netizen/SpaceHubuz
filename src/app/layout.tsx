@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Navbar } from "../components/layout/navbar";
 import { Footer } from "../components/layout/footer";
 import { FloatingConcierge } from "../components/ai/floating-concierge";
+import { I18nProvider } from "../lib/i18n";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -46,10 +47,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="uz" data-theme="light">
       <body className="flex min-h-screen flex-col bg-surface text-ink antialiased selection:bg-accent-subtle selection:text-accent">
-        <Navbar />
-        <div className="flex-1">{children}</div>
-        <Footer />
-        <FloatingConcierge />
+        <I18nProvider>
+          <Navbar />
+          <div className="flex-1">{children}</div>
+          <Footer />
+          <FloatingConcierge />
+        </I18nProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import { en } from "./en";
 import type { Locale, Translations } from "./types";
 
 export * from "./types";
+export * from "./context";
 
 const dictionaries: Record<Locale, Translations> = {
   uz,
