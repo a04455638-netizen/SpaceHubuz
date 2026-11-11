@@ -10,31 +10,41 @@ export default function LoginPage() {
   const router = useRouter();
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("+998 ");
+  const [fullName, setFullName] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
-  function handleSendOtp(e: React.FormEvent) {
+  async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-
-    // Validate +998 Uzbekistan phone format
-    const clean = phone.replace(/\s+/g, "");
-    if (!clean.startsWith("+998") || clean.length < 13) {
-      setError(
-        "Iltimos, to‘g‘ri O‘zbekiston telefon raqamini kiriting (+998 ...)",
-      );
-      return;
-    }
+    setNotice("");
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message || "SMS kod yuborishda xatolik yuz berdi");
+        return;
+      }
+
+      setNotice(data.message);
       setStep("otp");
-    }, 600);
+    } catch {
+      setError("Tarmoq xatosi. Iltimos qaytadan urinib ko'ring.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleVerifyOtp(e: React.FormEvent) {
+  async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
@@ -44,13 +54,31 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // Store session state
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code: otp, fullName }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message || "Kod noto'g'ri yoki muddati o'tgan");
+        return;
+      }
+
+      // Store in localStorage for fast client hydration
       localStorage.setItem("spacehub_auth_verified", "true");
-      localStorage.setItem("spacehub_user_phone", phone);
+      localStorage.setItem("spacehub_user_id", data.user.id);
+      localStorage.setItem("spacehub_user_phone", data.user.phone);
+      localStorage.setItem("spacehub_user_name", data.user.fullName);
+
       router.push("/account/profile");
-    }, 600);
+    } catch {
+      setError("Tarmoq xatosi. Qaytadan urinib ko'ring.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -80,8 +108,27 @@ export default function LoginPage() {
           </div>
         )}
 
+        {notice && (
+          <div className="mt-4 rounded-xl bg-status-info-bg p-3 text-xs font-semibold text-status-info text-center">
+            {notice}
+          </div>
+        )}
+
         {step === "phone" ? (
           <form onSubmit={handleSendOtp} className="mt-6 space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
+                Ism va familiyangiz (ixtiyoriy)
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                placeholder="Alisher Navoiy"
+                onChange={(e) => setFullName(e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-ink focus:border-accent focus:outline-none"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
                 Telefon raqamingiz
@@ -102,9 +149,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-sm font-bold text-white shadow transition hover:bg-accent-hover disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-sm font-bold text-white shadow transition hover:bg-accent-hover disabled:opacity-60 cursor-pointer"
             >
-              {loading ? "Yuborilmoqda…" : "SMS kod olish"}
+              {loading ? "Yuborilmoqda..." : "SMS kod olish"}
             </button>
           </form>
         ) : (
@@ -124,24 +171,31 @@ export default function LoginPage() {
               />
               <p className="mt-2 text-center text-[11px] text-ink-subtle">
                 Test muhitida ixtiyoriy 6 xonali kod (masalan,{" "}
-                <code>123456</code>) qabul qilinadi
+                <button
+                  type="button"
+                  onClick={() => setOtp("123456")}
+                  className="font-bold underline text-accent"
+                >
+                  123456
+                </button>
+                ) qabul qilinadi
               </p>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-sm font-bold text-white shadow transition hover:bg-accent-hover disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-sm font-bold text-white shadow transition hover:bg-accent-hover disabled:opacity-60 cursor-pointer"
             >
-              {loading ? "Tekshirilmoqda…" : "Tasdiqlash va Kirish"}
+              {loading ? "Tekshirilmoqda..." : "Tasdiqlash va Kirish"}
             </button>
 
             <button
               type="button"
               onClick={() => setStep("phone")}
-              className="w-full text-center text-xs font-semibold text-accent hover:underline pt-2"
+              className="w-full text-center text-xs font-semibold text-accent hover:underline pt-2 cursor-pointer"
             >
-              Raqamni o‘zgartirish
+              Raqamni o&apos;zgartirish
             </button>
           </form>
         )}

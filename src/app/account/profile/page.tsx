@@ -4,32 +4,62 @@ import { useState, useEffect } from "react";
 import { Save, Check } from "lucide-react";
 
 export default function AccountProfilePage() {
-  const [firstName, setFirstName] = useState("Aziz");
-  const [lastName, setLastName] = useState("Karimov");
-  const [phone] = useState("+998 90 123 45 67");
+  const [fullName, setFullName] = useState("Aziz Karimov");
+  const [phone, setPhone] = useState("+998 90 123 45 67");
   const [email, setEmail] = useState("aziz.karimov@example.uz");
   const [language, setLanguage] = useState("uz");
   const [theme, setTheme] = useState("light");
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      const savedFirst = localStorage.getItem("spacehub_user_first");
-      const savedLast = localStorage.getItem("spacehub_user_last");
-      if (savedFirst) setFirstName(savedFirst);
-      if (savedLast) setLastName(savedLast);
+      const savedPhone = localStorage.getItem("spacehub_user_phone");
+      const savedName = localStorage.getItem("spacehub_user_name");
+      const savedTheme = localStorage.getItem("spacehub_theme");
+      const savedLang = localStorage.getItem("spacehub_locale");
+
+      if (savedPhone) setPhone(savedPhone);
+      if (savedName) setFullName(savedName);
+      if (savedTheme) setTheme(savedTheme);
+      if (savedLang) setLanguage(savedLang);
+
+      // Fetch fresh profile from API
+      fetch("/api/account/profile")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.profile) {
+            if (data.profile.fullName) setFullName(data.profile.fullName);
+            if (data.profile.phone) setPhone(data.profile.phone);
+            if (data.profile.email) setEmail(data.profile.email);
+            if (data.profile.preferredLanguage) setLanguage(data.profile.preferredLanguage);
+          }
+        })
+        .catch(() => {});
     });
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    localStorage.setItem("spacehub_user_first", firstName);
-    localStorage.setItem("spacehub_user_last", lastName);
+    setLoading(true);
+
+    localStorage.setItem("spacehub_user_name", fullName);
     localStorage.setItem("spacehub_locale", language);
     localStorage.setItem("spacehub_theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
 
+    try {
+      await fetch("/api/account/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, preferredLanguage: language }),
+      });
+    } catch {
+      // Local changes still preserved
+    }
+
+    setLoading(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
@@ -41,7 +71,7 @@ export default function AccountProfilePage() {
           Mijoz profili
         </h1>
         <p className="text-xs text-ink-muted">
-          Shaxsiy ma’lumotlaringiz va ilova sozlamalari
+          Shaxsiy ma&apos;lumotlaringiz va ilova sozlamalari
         </p>
       </div>
 
@@ -52,35 +82,21 @@ export default function AccountProfilePage() {
         {saved && (
           <div className="flex items-center gap-2 rounded-xl bg-status-success-bg p-3.5 text-xs font-semibold text-status-success">
             <Check className="h-4 w-4" />
-            <span>Profil ma’lumotlari muvaffaqiyatli saqlandi!</span>
+            <span>Profil ma&apos;lumotlari muvaffaqiyatli saqlandi!</span>
           </div>
         )}
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
-              Ism
+              To&apos;liq ism
             </label>
             <div className="relative mt-1.5">
               <input
                 type="text"
-                value={firstName}
+                value={fullName}
                 required
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
-              Familiya
-            </label>
-            <div className="relative mt-1.5">
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                onChange={(e) => setFullName(e.target.value)}
                 className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
               />
             </div>
@@ -100,7 +116,7 @@ export default function AccountProfilePage() {
             </div>
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
               Elektron pochta (Ixtiyoriy)
             </label>
@@ -125,7 +141,7 @@ export default function AccountProfilePage() {
               onChange={(e) => setLanguage(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
             >
-              <option value="uz">O‘zbekcha (Default)</option>
+              <option value="uz">O&apos;zbekcha (Default)</option>
               <option value="ru">Русский</option>
               <option value="en">English</option>
             </select>
@@ -140,8 +156,8 @@ export default function AccountProfilePage() {
               onChange={(e) => setTheme(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
             >
-              <option value="light">Yorug‘ mavzu (Light)</option>
-              <option value="dark">Qorong‘i mavzu (Dark)</option>
+              <option value="light">Yorug&apos; mavzu (Light)</option>
+              <option value="dark">Qorong&apos;i mavzu (Dark)</option>
             </select>
           </div>
         </div>
@@ -149,10 +165,11 @@ export default function AccountProfilePage() {
         <div className="border-t border-border pt-6">
           <button
             type="submit"
-            className="flex items-center gap-2 rounded-xl bg-accent px-6 py-2.5 text-sm font-bold text-white shadow transition hover:bg-accent-hover"
+            disabled={loading}
+            className="flex items-center gap-2 rounded-xl bg-accent px-6 py-2.5 text-sm font-bold text-white shadow transition hover:bg-accent-hover disabled:opacity-60 cursor-pointer"
           >
             <Save className="h-4 w-4" />
-            <span>O‘zgarishlarni saqlash</span>
+            <span>{loading ? "Saqlanmoqda..." : "O&apos;zgarishlarni saqlash"}</span>
           </button>
         </div>
       </form>
