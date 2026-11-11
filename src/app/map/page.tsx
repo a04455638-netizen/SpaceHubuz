@@ -1,20 +1,84 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Navigation, Search, Star, ExternalLink, ArrowRight } from "lucide-react";
-import { CURATED_VENUES, type CuratedVenue } from "../../server/mock-venues";
-import { MapWrapper } from "../../components/map/map-wrapper";
-import { useI18n } from "../../lib/i18n";
+import {
+  Navigation,
+  Search,
+  Star,
+  ExternalLink,
+  ArrowRight,
+  Database,
+  RefreshCw,
+} from "lucide-react";
+import { CURATED_VENUES, type CuratedVenue } from "@/server/mock-venues";
+import { MapWrapper } from "@/components/map/map-wrapper";
+import { useI18n } from "@/lib/i18n";
 
 export default function MapDiscoveryPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedVenue, setSelectedVenue] = useState<CuratedVenue | null>(CURATED_VENUES[0]);
+  const [venues, setVenues] = useState<CuratedVenue[]>(CURATED_VENUES);
+  const [isLiveDatabase, setIsLiveDatabase] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [selectedVenue, setSelectedVenue] = useState<CuratedVenue | null>(
+    CURATED_VENUES[0] || null
+  );
 
-  const filteredVenues = CURATED_VENUES.filter((venue) => {
+  // Fetch real-time venue locations from Supabase via /api/venues
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadVenues() {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (selectedCategory && selectedCategory !== "all") {
+          params.set("category", selectedCategory);
+        }
+        if (searchQuery.trim()) {
+          params.set("q", searchQuery.trim());
+        }
+
+        const res = await fetch(`/api/venues?${params.toString()}`);
+        if (!res.ok) throw new Error("API response error");
+
+        const data = await res.json();
+        if (!cancelled && data.venues && Array.isArray(data.venues)) {
+          if (data.venues.length > 0) {
+            setVenues(data.venues);
+            setIsLiveDatabase(true);
+            setSelectedVenue((prev) => {
+              if (prev && data.venues.some((v: CuratedVenue) => v.id === prev.id)) {
+                return prev;
+              }
+              return data.venues[0] || null;
+            });
+          }
+        }
+      } catch {
+        // Gracefully stay on curated venues
+        if (!cancelled) {
+          setIsLiveDatabase(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    const timer = setTimeout(loadVenues, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [selectedCategory, searchQuery]);
+
+  // Client-side instant filter over active venues
+  const filteredVenues = venues.filter((venue) => {
     const matchesCategory =
       selectedCategory === "all" || venue.category === selectedCategory;
     const matchesQuery =
@@ -30,9 +94,26 @@ export default function MapDiscoveryPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-ink sm:text-3xl">
-            {t.map.title}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold text-ink sm:text-3xl">
+              {t.map.title}
+            </h1>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                isLiveDatabase
+                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                  : "bg-surface-muted text-ink-muted border border-border"
+              }`}
+              title={
+                isLiveDatabase
+                  ? "Supabase PostgreSQL real-time database connected"
+                  : "Curated high-precision verified coordinates"
+              }
+            >
+              <Database className="h-3 w-3" />
+              <span>{isLiveDatabase ? "Supabase Live" : "Verified GPS"}</span>
+            </span>
+          </div>
           <p className="mt-1 text-sm text-ink-muted">
             {t.map.subtitle}
           </p>
@@ -45,7 +126,7 @@ export default function MapDiscoveryPage() {
       </div>
 
       {/* Category Pills Filter */}
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-6 flex flex-wrap items-center gap-2">
         {[
           { id: "all", name: t.categories.all },
           { id: "coworking", name: t.categories.work },
@@ -66,6 +147,13 @@ export default function MapDiscoveryPage() {
             {cat.name}
           </button>
         ))}
+
+        {loading && (
+          <span className="flex items-center gap-1 text-xs text-ink-muted ml-2">
+            <RefreshCw className="h-3 w-3 animate-spin text-accent" />
+            <span>Yangilanmoqda...</span>
+          </span>
+        )}
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -116,7 +204,7 @@ export default function MapDiscoveryPage() {
                           {venue.category}
                         </span>
                         <span className="flex items-center gap-0.5 text-xs font-bold text-amber-500">
-                          <Star className="h-3 w-3 fill-amber-500" /> {venue.rating}
+                          <Star className="h-3 w-3 fill-amber-500" /> {venue.rating.toFixed(1)}
                         </span>
                       </div>
                       <h3 className="text-sm font-bold text-ink line-clamp-1 mt-0.5">
@@ -129,7 +217,7 @@ export default function MapDiscoveryPage() {
 
                     <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
                       <span className="text-xs font-extrabold text-ink">
-                        {venue.pricePerHour.toLocaleString()} UZS
+                        {venue.pricePerHour.toLocaleString("uz-UZ")} UZS
                         <span className="text-[10px] font-normal text-ink-muted"> / soat</span>
                       </span>
                       <Link
@@ -149,27 +237,32 @@ export default function MapDiscoveryPage() {
         </div>
 
         {/* Right Interactive Leaflet Map */}
-        <div className="order-1 lg:order-2 lg:col-span-2 overflow-hidden rounded-2xl border border-border bg-surface-card shadow-sm">
-          <MapWrapper
-            venues={filteredVenues}
-            selectedVenueId={selectedVenue?.id}
-            onSelectVenue={(v) => setSelectedVenue(v)}
-            className="h-[400px] lg:h-[650px] w-full"
-          />
+        <div className="order-1 lg:order-2 lg:col-span-2 overflow-hidden rounded-2xl border border-border bg-surface-card shadow-sm flex flex-col">
+          <div className="relative flex-1">
+            <MapWrapper
+              venues={filteredVenues}
+              selectedVenueId={selectedVenue?.id}
+              onSelectVenue={(v) => setSelectedVenue(v)}
+              className="h-[420px] lg:h-[580px] w-full"
+            />
+          </div>
 
           {/* Bottom Selected Venue Bar */}
           {selectedVenue && (
             <div className="border-t border-border p-4 bg-surface flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h4 className="text-sm font-bold text-ink">{selectedVenue.name}</h4>
-                <p className="text-xs text-ink-muted">{selectedVenue.address}</p>
+                <p className="text-xs text-ink-muted">
+                  📍 {selectedVenue.address} ({selectedVenue.latitude.toFixed(4)}, {selectedVenue.longitude.toFixed(4)})
+                </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <a
                   href={`https://maps.google.com/?q=${selectedVenue.latitude},${selectedVenue.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface-card px-3 py-1.5 text-xs font-bold text-ink hover:bg-surface-muted transition"
+                  title="Open in Google Maps"
                 >
                   <ExternalLink className="h-3.5 w-3.5 text-accent" />
                   <span>Google Maps</span>
@@ -179,6 +272,7 @@ export default function MapDiscoveryPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface-card px-3 py-1.5 text-xs font-bold text-ink hover:bg-surface-muted transition"
+                  title="Open in Yandex Maps"
                 >
                   <ExternalLink className="h-3.5 w-3.5 text-amber-500" />
                   <span>Yandex Maps</span>
@@ -187,7 +281,7 @@ export default function MapDiscoveryPage() {
                   href={`/venues/${selectedVenue.slug}`}
                   className="inline-flex items-center gap-1 rounded-xl bg-accent px-4 py-1.5 text-xs font-bold text-white hover:bg-accent-hover transition shadow-sm"
                 >
-                  <span>Bron qilish</span>
+                  <span>{locale === "uz" ? "Bron qilish" : locale === "ru" ? "Забронировать" : "Book now"}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>

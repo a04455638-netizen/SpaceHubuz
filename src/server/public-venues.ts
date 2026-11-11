@@ -1,5 +1,5 @@
-import { getDatabase } from "./db";
-import { searchCuratedVenues, getVenueBySlug, type CuratedVenue } from "./mock-venues";
+import { getDatabase } from "./db.ts";
+import { searchCuratedVenues, getVenueBySlug, type CuratedVenue } from "./mock-venues.ts";
 
 const publicVenue = () => ({
   publishedAt: { lte: new Date() },

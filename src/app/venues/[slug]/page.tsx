@@ -235,6 +235,26 @@ export default async function VenuePage({
                 src={`https://www.openstreetmap.org/export/embed.html?bbox=${venue.longitude - 0.01}%2C${venue.latitude - 0.008}%2C${venue.longitude + 0.01}%2C${venue.latitude + 0.008}&amp;layer=mapnik&amp;marker=${venue.latitude}%2C${venue.longitude}`}
               />
             </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <a
+                href={`https://maps.google.com/?q=${venue.latitude},${venue.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-muted transition"
+              >
+                <ExternalLink className="h-3.5 w-3.5 text-accent" />
+                <span>Google Maps orqali ochish</span>
+              </a>
+              <a
+                href={`https://yandex.uz/maps/?pt=${venue.longitude},${venue.latitude}&z=16&l=map`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-muted transition"
+              >
+                <ExternalLink className="h-3.5 w-3.5 text-amber-500" />
+                <span>Yandex Maps orqali ochish</span>
+              </a>
+            </div>
           </div>
         </div>
 

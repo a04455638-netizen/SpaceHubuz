@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { CuratedVenue } from "../../server/mock-venues";
+import type { CuratedVenue } from "@/server/mock-venues";
 
 interface InteractiveMapProps {
   venues: CuratedVenue[];
@@ -26,123 +26,218 @@ export default function InteractiveMap({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
+  // 1. Initialize Leaflet Map Instance
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // Initialize map if not yet created
     if (!mapInstanceRef.current) {
       const map = L.map(mapContainerRef.current, {
         center,
         zoom,
         scrollWheelZoom: true,
+        zoomControl: true,
       });
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(map);
+      // Production-compatible OpenStreetMap tile provider via CartoDB Voyager CDN
+      // High-performance, retina-ready, zero API key required, with proper attribution
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 20,
+        }
+      ).addTo(map);
 
       mapInstanceRef.current = map;
     }
 
+    const currentMap = mapInstanceRef.current;
+
+    return () => {
+      // Clean up map instance on unmount
+      if (currentMap) {
+        currentMap.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [center, zoom]);
+
+  // 2. Synchronize Markers with Venues and Selected State
+  useEffect(() => {
     const map = mapInstanceRef.current;
+    if (!map) return;
 
     // Clear existing markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current.clear();
 
-    // Custom modern SVG pin
-    const createCustomIcon = (isSelected: boolean, category: string) => {
-      const color = isSelected
-        ? "#2563EB"
-        : category === "sports"
-        ? "#059669"
-        : category === "meetings"
-        ? "#7C3AED"
-        : category === "events"
-        ? "#DC2626"
-        : "#2563EB";
+    const categoryIcons: Record<string, { bg: string; icon: string }> = {
+      coworking: { bg: "#2563EB", icon: "💻" },
+      sports: { bg: "#059669", icon: "⚽" },
+      meetings: { bg: "#7C3AED", icon: "👥" },
+      events: { bg: "#DC2626", icon: "🎉" },
+    };
+
+    const createPin = (venue: CuratedVenue, isSelected: boolean) => {
+      const cat = categoryIcons[venue.category] || { bg: "#2563EB", icon: "📍" };
+      const color = isSelected ? "#0F172A" : cat.bg;
+      const border = isSelected ? "3px solid #F59E0B" : "2px solid #FFFFFF";
+      const scale = isSelected ? "scale(1.15)" : "scale(1)";
+      const zIndex = isSelected ? 1000 : 100;
 
       return L.divIcon({
-        className: "custom-marker-icon",
+        className: "spacehub-leaflet-pin",
         html: `
           <div style="
-            background-color: ${color};
-            color: white;
-            font-weight: bold;
-            padding: 6px 10px;
-            border-radius: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            border: 2px solid white;
-            font-size: 11px;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transform: translate(-50%, -100%);
+            transform: translate(-50%, -100%) ${scale};
+            transform-origin: bottom center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: ${zIndex};
             cursor: pointer;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
           ">
-            <span>📍</span>
-            <span>SpaceHub</span>
+            <div style="
+              background-color: ${color};
+              color: #FFFFFF;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              font-weight: 700;
+              font-size: 11px;
+              padding: 5px 9px;
+              border-radius: 9999px;
+              box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+              border: ${border};
+              white-space: nowrap;
+              display: flex;
+              align-items: center;
+              gap: 5px;
+            ">
+              <span style="font-size: 12px;">${cat.icon}</span>
+              <span>${venue.pricePerHour.toLocaleString("uz-UZ")} UZS</span>
+            </div>
+            <div style="
+              width: 0;
+              height: 0;
+              border-left: 6px solid transparent;
+              border-right: 6px solid transparent;
+              border-top: 6px solid ${color};
+              margin-top: -1px;
+            "></div>
           </div>
         `,
         iconSize: [40, 40],
-        iconAnchor: [20, 20],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -42],
       });
     };
 
-    // Add markers for venues
+    const bounds = L.latLngBounds([]);
+    let hasValidCoords = false;
+
     venues.forEach((v) => {
       if (!v.latitude || !v.longitude) return;
 
+      const latLng = L.latLng(v.latitude, v.longitude);
+      bounds.extend(latLng);
+      hasValidCoords = true;
+
       const isSelected = v.id === selectedVenueId;
-      const marker = L.marker([v.latitude, v.longitude], {
-        icon: createCustomIcon(isSelected, v.category),
+      const marker = L.marker(latLng, {
+        icon: createPin(v, isSelected),
+        zIndexOffset: isSelected ? 1000 : 0,
       }).addTo(map);
 
-      // Popup card with photo, price and direction buttons
-      const popupHtml = `
-        <div style="font-family: inherit; width: 220px; padding: 2px;">
-          <div style="height: 100px; width: 100%; border-radius: 8px; overflow: hidden; margin-bottom: 8px;">
-            <img src="${v.featuredImage}" alt="${v.name}" style="width: 100%; height: 100%; object-fit: cover;" />
+      // Popup with photo, rating, price, and maps navigation
+      const popupContent = `
+        <div style="
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          width: 240px;
+          padding: 2px;
+          color: #0F172A;
+        ">
+          <div style="
+            position: relative;
+            height: 110px;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            background-color: #E2E8F0;
+          ">
+            <img
+              src="${v.featuredImage}"
+              alt="${v.name}"
+              style="width: 100%; height: 100%; object-fit: cover; display: block;"
+              loading="lazy"
+            />
           </div>
-          <div style="font-weight: 800; font-size: 13px; line-height: 1.3; color: #0F172A; margin-bottom: 4px;">
+          <div style="font-weight: 800; font-size: 13px; line-height: 1.3; margin-bottom: 4px; color: #0F172A;">
             ${v.name}
           </div>
-          <div style="font-size: 11px; color: #64748B; margin-bottom: 6px;">
-            📍 ${v.district}, ${v.city}
+          <div style="font-size: 11px; color: #64748B; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+            <span>📍</span>
+            <span>${v.district}, ${v.city}</span>
           </div>
-          <div style="font-weight: bold; font-size: 13px; color: #2563EB; margin-bottom: 8px;">
-            ${v.pricePerHour.toLocaleString()} UZS <span style="font-size: 10px; font-weight: normal; color: #64748B;">/ soat</span>
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #E2E8F0;
+          ">
+            <div style="font-weight: 800; font-size: 13px; color: #059669;">
+              ${v.pricePerHour.toLocaleString("uz-UZ")} UZS
+              <span style="font-size: 10px; font-weight: normal; color: #64748B;">/ soat</span>
+            </div>
+            <div style="font-size: 11px; font-weight: 700; color: #D97706;">
+              ★ ${v.rating.toFixed(1)}
+            </div>
           </div>
-          <div style="display: flex; gap: 4px; margin-top: 6px;">
-            <a href="/venues/${v.slug}" style="
-              flex: 1;
-              text-align: center;
-              background-color: #2563EB;
-              color: white;
-              padding: 5px 8px;
-              border-radius: 6px;
-              font-size: 11px;
-              font-weight: bold;
-              text-decoration: none;
-            ">Batafsil</a>
-            <a href="https://maps.google.com/?q=${v.latitude},${v.longitude}" target="_blank" rel="noopener noreferrer" style="
-              text-align: center;
-              background-color: #F1F5F9;
-              color: #0F172A;
-              padding: 5px 8px;
-              border-radius: 6px;
-              font-size: 11px;
-              font-weight: bold;
-              text-decoration: none;
-            ">Maps ↗</a>
+          <div style="display: flex; gap: 4px;">
+            <a
+              href="/venues/${v.slug}"
+              style="
+                flex: 1;
+                text-align: center;
+                background-color: #2563EB;
+                color: #FFFFFF;
+                padding: 6px 8px;
+                border-radius: 8px;
+                font-size: 11px;
+                font-weight: 700;
+                text-decoration: none;
+                display: block;
+              "
+            >Batafsil</a>
+            <a
+              href="https://maps.google.com/?q=${v.latitude},${v.longitude}"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="
+                text-align: center;
+                background-color: #F1F5F9;
+                color: #0F172A;
+                padding: 6px 8px;
+                border-radius: 8px;
+                font-size: 11px;
+                font-weight: 600;
+                text-decoration: none;
+                display: block;
+              "
+              title="Google Maps"
+            >Maps ↗</a>
           </div>
         </div>
       `;
 
-      marker.bindPopup(popupHtml);
+      marker.bindPopup(popupContent, {
+        maxWidth: 260,
+        className: "spacehub-popup",
+      });
 
       marker.on("click", () => {
         onSelectVenue?.(v);
@@ -152,14 +247,27 @@ export default function InteractiveMap({
 
       if (isSelected) {
         marker.openPopup();
-        map.setView([v.latitude, v.longitude], 15, { animate: true });
       }
     });
 
-    return () => {
-      // Don't destroy map on every small render
-    };
-  }, [venues, selectedVenueId, onSelectVenue, center, zoom]);
+    // Auto-fit bounds if we have venues and no specific venue is explicitly selected
+    if (hasValidCoords && !selectedVenueId && venues.length > 1) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    }
+  }, [venues, selectedVenueId, onSelectVenue]);
+
+  // 3. Smooth Pan to Selected Venue when selectedVenueId changes
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !selectedVenueId) return;
+
+    const marker = markersRef.current.get(selectedVenueId);
+    if (marker) {
+      const latLng = marker.getLatLng();
+      map.setView(latLng, Math.max(map.getZoom(), 14), { animate: true });
+      marker.openPopup();
+    }
+  }, [selectedVenueId]);
 
   return <div ref={mapContainerRef} className={className} />;
 }
