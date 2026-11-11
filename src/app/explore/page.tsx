@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
-  Filter,
   MapPin,
   Star,
   Users,
@@ -18,14 +18,28 @@ import { CURATED_VENUES } from "../../server/mock-venues";
 import { useI18n } from "../../lib/i18n";
 import { formatPrice } from "@/lib/format-price";
 
-export default function ExplorePage() {
+function ExploreContent() {
   const { t, locale } = useI18n();
+  const searchParams = useSearchParams();
 
-  const [query, setQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedCity, setSelectedCity] = useState<string>("all");
+  const [query, setQuery] = useState(() => searchParams.get("q") || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(() => searchParams.get("category") || "all");
+  const [selectedCity, setSelectedCity] = useState<string>(() => searchParams.get("city") || "all");
   const [sortBy, setSortBy] = useState<"recommended" | "price_asc" | "price_desc" | "rating">("recommended");
   const [maxPrice] = useState<number>(1500000);
+
+  // Sync state if URL query params change
+  useEffect(() => {
+    const handle = requestAnimationFrame(() => {
+      const qParam = searchParams.get("q");
+      const catParam = searchParams.get("category");
+      const cityParam = searchParams.get("city");
+      if (qParam !== null) setQuery(qParam);
+      if (catParam !== null) setSelectedCategory(catParam);
+      if (cityParam !== null) setSelectedCity(cityParam);
+    });
+    return () => cancelAnimationFrame(handle);
+  }, [searchParams]);
 
   const filteredVenues = useMemo(() => {
     return CURATED_VENUES.filter((venue) => {
@@ -37,7 +51,8 @@ export default function ExplorePage() {
         q === "" ||
         venue.name.toLowerCase().includes(q) ||
         venue.district.toLowerCase().includes(q) ||
-        venue.address.toLowerCase().includes(q);
+        venue.address.toLowerCase().includes(q) ||
+        venue.description[locale]?.toLowerCase().includes(q);
 
       return matchCat && matchCity && matchPrice && matchQuery;
     }).sort((a, b) => {
@@ -46,7 +61,7 @@ export default function ExplorePage() {
       if (sortBy === "rating") return b.rating - a.rating;
       return 0; // recommended
     });
-  }, [query, selectedCategory, selectedCity, maxPrice, sortBy]);
+  }, [query, selectedCategory, selectedCity, maxPrice, sortBy, locale]);
 
   const categoryTabs = [
     { id: "all", name: t.categories.all },
@@ -165,16 +180,27 @@ export default function ExplorePage() {
         </Link>
       </div>
 
-      {/* Venues Grid with Realistic Photos & Framer Motion */}
+      {/* Venues Grid Display */}
       {filteredVenues.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-surface-card p-12 text-center">
-          <div className="h-16 w-16 rounded-full bg-accent-subtle flex items-center justify-center text-accent mb-4">
-            <Filter className="h-8 w-8" />
+        <div className="rounded-3xl border border-dashed border-border bg-surface-card p-12 text-center space-y-3">
+          <div className="h-12 w-12 mx-auto rounded-full bg-surface-muted flex items-center justify-center text-ink-muted">
+            <Search className="h-6 w-6" />
           </div>
           <h3 className="text-base font-bold text-ink">{t.explore.noVenuesFound}</h3>
-          <p className="mt-1 text-xs text-ink-muted max-w-sm">
-            {t.explore.tryAdjustingSearch}
+          <p className="text-xs text-ink-muted max-w-sm mx-auto">
+            Qidiruv so‘rovingizni o‘zgartiring yoki filtrlarni tozalab qaytadan ko‘ring.
           </p>
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setSelectedCategory("all");
+              setSelectedCity("all");
+            }}
+            className="rounded-xl bg-accent px-4 py-2 text-xs font-bold text-white transition hover:bg-accent-hover cursor-pointer"
+          >
+            {t.explore.clearFilters}
+          </button>
         </div>
       ) : (
         <motion.div
@@ -183,17 +209,29 @@ export default function ExplorePage() {
         >
           <AnimatePresence>
             {filteredVenues.map((venue) => {
-              const description = venue.description[locale] || venue.description.uz;
               const mainResource = venue.resources[0];
+              const description = venue.description[locale] || venue.description.uz;
+              const categoryLabel =
+                venue.category === "coworking"
+                  ? t.categories.work
+                  : venue.category === "sports"
+                    ? t.categories.sports
+                    : venue.category === "meetings"
+                      ? t.categories.meetings
+                      : venue.category === "events"
+                        ? t.categories.events
+                        : venue.category === "cinema"
+                          ? t.categories.cinema
+                          : venue.category;
 
               return (
                 <motion.div
-                  key={venue.id}
                   layout
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.25 }}
+                  key={venue.id}
                   className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface-card shadow-sm transition hover:border-border-strong hover:shadow-md"
                 >
                   {/* Photo Preview with Badges */}
@@ -219,7 +257,7 @@ export default function ExplorePage() {
 
                     {/* Category Tag */}
                     <div className="absolute right-3 top-3 rounded-xl bg-black/60 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                      {venue.category}
+                      {categoryLabel}
                     </div>
 
                     {/* Verified Guarantee */}
@@ -293,5 +331,19 @@ export default function ExplorePage() {
         </motion.div>
       )}
     </main>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-7xl px-4 py-12 text-center text-xs font-semibold text-ink-muted animate-pulse">
+          Qidirilmoqda...
+        </div>
+      }
+    >
+      <ExploreContent />
+    </Suspense>
   );
 }

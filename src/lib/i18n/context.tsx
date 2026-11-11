@@ -9,7 +9,8 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale, Translations } from "./types";
-import { getTranslation } from "./index";
+import { getTranslation } from "./dictionaries";
+import { uz } from "./uz";
 
 interface I18nContextValue {
   locale: Locale;
@@ -20,7 +21,7 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue>({
   locale: "uz",
   setLocale: () => {},
-  t: getTranslation("uz"),
+  t: uz,
 });
 
 interface I18nProviderProps {
