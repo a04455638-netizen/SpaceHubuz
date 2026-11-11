@@ -126,6 +126,14 @@ export function Footer() {
                   {t.footer.forOwners}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/admin/dashboard"
+                  className="text-ink-muted hover:text-accent transition font-semibold"
+                >
+                  Admin boshqaruv paneli
+                </Link>
+              </li>
             </ul>
           </div>
 
