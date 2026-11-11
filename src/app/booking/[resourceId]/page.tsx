@@ -35,6 +35,22 @@ export default function BookingResourcePage({
   const [creating, setCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [suggestedSlots, setSuggestedSlots] = useState<Array<{ startsAt: string; endsAt: string }>>([]);
+  const [customerName, setCustomerName] = useState("Alisher Navoiy");
+  const [customerPhone, setCustomerPhone] = useState("+998 90 123 45 67");
+
+  useEffect(() => {
+    const handle = requestAnimationFrame(() => {
+      try {
+        const savedName = localStorage.getItem("spacehub_user_name");
+        const savedPhone = localStorage.getItem("spacehub_user_phone");
+        if (savedName) setCustomerName(savedName);
+        if (savedPhone) setCustomerPhone(savedPhone);
+      } catch {
+        // ignore
+      }
+    });
+    return () => cancelAnimationFrame(handle);
+  }, []);
 
   const basePriceHourly = 50000; // 50,000 UZS base
 
@@ -107,16 +123,12 @@ export default function BookingResourcePage({
           startsAt,
           endsAt,
           guestCount: 1,
+          customerName: customerName || "Mijoz",
+          customerPhone: customerPhone || "+998 90 123 45 67",
         }),
       });
 
       const data = await res.json();
-
-      if (res.status === 401) {
-        // Redirect to login preserving booking intent
-        router.push(`/auth/login?redirect=/booking/${resourceId}`);
-        return;
-      }
 
       if (!res.ok) {
         setErrorMessage(data.message || "Ushbu vaqt band qilingan");
@@ -125,6 +137,15 @@ export default function BookingResourcePage({
         }
         setCreating(false);
         return;
+      }
+
+      // Persist customer info in localStorage
+      try {
+        localStorage.setItem("spacehub_auth_verified", "true");
+        localStorage.setItem("spacehub_user_name", customerName);
+        localStorage.setItem("spacehub_user_phone", customerPhone);
+      } catch {
+        // ignore
       }
 
       sessionStorage.setItem(
@@ -137,6 +158,8 @@ export default function BookingResourcePage({
           addons: selectedAddons,
           total: data.totalAmount || total,
           expiresAt: data.expiresAt,
+          customerName,
+          customerPhone,
         }),
       );
 
@@ -328,6 +351,33 @@ export default function BookingResourcePage({
 
         {/* Right: Summary card */}
         <div className="space-y-6">
+          {/* Customer Information Card */}
+          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm space-y-4">
+            <h2 className="text-base font-bold text-ink">Mijoz ma&apos;lumotlari</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-ink-muted">Ism va familiya</label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Ismingizni kiriting"
+                  className="mt-1 w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-ink focus:border-accent focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-ink-muted">Telefon raqam</label>
+                <input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="+998 90 123 45 67"
+                  className="mt-1 w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-ink focus:border-accent focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm space-y-4">
             <h2 className="text-base font-bold text-ink">To&apos;lov hisobi</h2>
 

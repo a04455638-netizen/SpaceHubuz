@@ -59,6 +59,7 @@ export const en: Translations = {
     sports: "Sports Facilities",
     meetings: "Meetings & Conferences",
     events: "Event Halls & Banquets",
+    cinema: "Cinema & VIP Screening",
     workDesc: "Quiet workspaces, ultra-fast Wi-Fi, and comfort",
     sportsDesc: "Futsal pitches, tennis & padel courts, gyms",
     meetingsDesc: "Boardrooms and auditoriums for 100+ attendees",

@@ -59,6 +59,7 @@ export interface Translations {
     sports: string;
     meetings: string;
     events: string;
+    cinema: string;
     workDesc: string;
     sportsDesc: string;
     meetingsDesc: string;

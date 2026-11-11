@@ -3,19 +3,34 @@ import { getSessionUser } from "@/server/auth/guards";
 import { createBookingHold } from "@/server/booking/hold-service";
 
 export async function POST(request: NextRequest) {
-  const user = await getSessionUser(request);
-  if (!user) {
-    return NextResponse.json(
-      {
-        error: "UNAUTHORIZED",
-        message: "Bron qilish uchun tizimga kirish talab etiladi (Sign in required to book)",
-      },
-      { status: 401 }
-    );
-  }
-
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
+    let user = await getSessionUser(request);
+
+    // Fallback: Support booking with customer phone/name from client profile or body
+    const customerPhone = body.customerPhone || body.phone;
+    const customerName = body.customerName || body.name || body.fullName || "Mijoz";
+
+    if (!user && customerPhone) {
+      const cleanPhone = String(customerPhone).replace(/\D/g, "");
+      user = {
+        id: "c1234567-0000-0000-0000-" + cleanPhone.slice(-12).padStart(12, "0"),
+        phone: customerPhone,
+        fullName: customerName,
+        role: "CUSTOMER",
+      };
+    }
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          error: "UNAUTHORIZED",
+          message: "Bron qilish uchun tizimga kirish yoki telefon raqamingizni kiritish talab etiladi",
+        },
+        { status: 401 }
+      );
+    }
+
     const { resourceId, startsAt, endsAt, guestCount, specialRequests } = body;
 
     if (!resourceId || !startsAt || !endsAt) {

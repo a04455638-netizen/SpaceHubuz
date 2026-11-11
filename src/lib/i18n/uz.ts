@@ -59,6 +59,7 @@ export const uz: Translations = {
     sports: "Sport maydonlari",
     meetings: "Majlis va Konferensiya",
     events: "Tadbir va Bayram zallari",
+    cinema: "Kinoteatr va VIP kinozallar",
     workDesc: "Sokin ish stollari, tezyurar Wi-Fi va qulay sharoitlar",
     sportsDesc: "Futsal, mini-futbol, tennis va padel kortlari",
     meetingsDesc: "Muzokaralar xonasi va 100+ kishilik konferens zallari",

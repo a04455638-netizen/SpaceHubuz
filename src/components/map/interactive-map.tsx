@@ -56,7 +56,13 @@ export default function InteractiveMap({
     return () => {
       // Clean up map instance on unmount
       if (currentMap) {
-        currentMap.remove();
+        try {
+          currentMap.stop();
+          currentMap.closePopup();
+          currentMap.remove();
+        } catch {
+          // ignore
+        }
         mapInstanceRef.current = null;
       }
     };
@@ -67,8 +73,16 @@ export default function InteractiveMap({
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Clear existing markers
-    markersRef.current.forEach((marker) => marker.remove());
+    // Clear existing markers safely
+    markersRef.current.forEach((marker) => {
+      try {
+        marker.closePopup();
+        marker.unbindPopup();
+        marker.remove();
+      } catch {
+        // ignore
+      }
+    });
     markersRef.current.clear();
 
     const i18nText = {
@@ -102,6 +116,7 @@ export default function InteractiveMap({
       sports: { bg: "#059669", icon: "⚽" },
       meetings: { bg: "#7C3AED", icon: "👥" },
       events: { bg: "#DC2626", icon: "🎉" },
+      cinema: { bg: "#EA580C", icon: "🎬" },
     };
 
     const createPin = (venue: CuratedVenue, isSelected: boolean) => {
@@ -270,15 +285,15 @@ export default function InteractiveMap({
       });
 
       markersRef.current.set(v.id, marker);
-
-      if (isSelected) {
-        marker.openPopup();
-      }
     });
 
     // Auto-fit bounds if we have venues and no specific venue is explicitly selected
     if (hasValidCoords && !selectedVenueId && venues.length > 1) {
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      try {
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      } catch {
+        // ignore
+      }
     }
   }, [venues, selectedVenueId, onSelectVenue, locale]);
 
@@ -288,10 +303,23 @@ export default function InteractiveMap({
     if (!map || !selectedVenueId) return;
 
     const marker = markersRef.current.get(selectedVenueId);
-    if (marker) {
-      const latLng = marker.getLatLng();
-      map.setView(latLng, Math.max(map.getZoom(), 14), { animate: true });
-      marker.openPopup();
+    if (marker && map.hasLayer(marker)) {
+      try {
+        const latLng = marker.getLatLng();
+        map.panTo(latLng, { animate: true, duration: 0.4 });
+        const timer = setTimeout(() => {
+          if (mapInstanceRef.current && mapInstanceRef.current.hasLayer(marker)) {
+            try {
+              marker.openPopup();
+            } catch {
+              // ignore
+            }
+          }
+        }, 200);
+        return () => clearTimeout(timer);
+      } catch {
+        // ignore
+      }
     }
   }, [selectedVenueId]);
 

@@ -30,7 +30,32 @@ export async function getSessionUser(request?: RequestWithHeaders): Promise<Auth
     };
   }
 
-  // 2. If Supabase is not configured, return null without importing server headers
+  // 2. Check persistent cookie-based session (from direct phone login)
+  try {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    const cookieUser = cookieStore.get("spacehub_user")?.value;
+    if (cookieUser) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(cookieUser));
+        if (parsed && (parsed.id || parsed.phone)) {
+          return {
+            id: parsed.id || `c1234567-0000-0000-0000-${parsed.phone?.slice(-12).padStart(12, "0") || "000000000001"}`,
+            phone: parsed.phone,
+            email: parsed.email,
+            role: (parsed.role as AuthRole) || "CUSTOMER",
+            fullName: parsed.fullName || "SpaceHub User",
+          };
+        }
+      } catch {
+        // ignore parse error
+      }
+    }
+  } catch {
+    // next/headers might not be available in non-request test contexts
+  }
+
+  // 3. If Supabase is not configured, return null without importing server headers
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return null;
   }

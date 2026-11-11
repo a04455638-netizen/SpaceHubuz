@@ -54,6 +54,7 @@ export default function ExplorePage() {
     { id: "sports", name: t.categories.sports },
     { id: "meetings", name: t.categories.meetings },
     { id: "events", name: t.categories.events },
+    { id: "cinema", name: t.categories.cinema },
   ];
 
   return (

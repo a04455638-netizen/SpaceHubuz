@@ -152,6 +152,7 @@ export default function MapDiscoveryPage() {
           { id: "sports", name: t.categories.sports },
           { id: "meetings", name: t.categories.meetings },
           { id: "events", name: t.categories.events },
+          { id: "cinema", name: t.categories.cinema },
         ].map((cat) => (
           <button
             key={cat.id}
@@ -234,7 +235,9 @@ export default function MapDiscoveryPage() {
                                 ? t.categories.meetings
                                 : venue.category === "events"
                                   ? t.categories.events
-                                  : venue.category}
+                                  : venue.category === "cinema"
+                                    ? t.categories.cinema
+                                    : venue.category}
                         </span>
                         <span className="flex items-center gap-0.5 text-xs font-bold text-amber-500">
                           <Star className="h-3 w-3 fill-amber-500" /> {venue.rating.toFixed(1)}
