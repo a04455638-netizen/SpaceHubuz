@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /owner/
+
+Sitemap: https://spacehub.uz/sitemap.xml

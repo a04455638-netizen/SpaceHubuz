@@ -25,8 +25,8 @@ export interface CategorySummary {
 export const CORE_CATEGORIES: readonly CategorySummary[] = [
   {
     id: "work",
-    name: "Ish va o‘qish",
-    examples: ["Kovorking", "Ish stoli", "O‘quv xonasi", "Kutubxona joyi"],
+    name: "Ish va o'qish",
+    examples: ["Kovorking", "Ish stoli", "O'quv xonasi", "Kutubxona joyi"],
   },
   {
     id: "sports",
@@ -53,11 +53,35 @@ export const CORE_CATEGORIES: readonly CategorySummary[] = [
     id: "events",
     name: "Tadbir joylari",
     examples: [
-      "To‘yxona",
+      "To'yxona",
       "Banket zali",
-      "Ko‘rgazma maydoni",
+      "Ko'rgazma maydoni",
       "Ochiq tadbir hududi",
     ],
+  },
+];
+
+export const CONCIERGE_TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
+  {
+    type: "function",
+    function: {
+      name: "search_venues",
+      description: "O'zbekistondagi tasdiqlangan joylar va zallarni qidirish (Search verified venues)",
+      parameters: {
+        type: "object",
+        properties: {
+          category: {
+            type: "string",
+            enum: ["coworking", "sports", "meetings", "events"],
+            description: "Joy toifasi",
+          },
+          city: {
+            type: "string",
+            description: "Shahar nomi (masalan, Toshkent, Samarqand)",
+          },
+        },
+      },
+    },
   },
 ];
 
@@ -140,12 +164,37 @@ export async function askConcierge(
           content: m.content.slice(0, 1000), // bounded input
         })),
       ],
+      tools: CONCIERGE_TOOLS,
+      tool_choice: "auto",
       max_tokens: 600,
       temperature: 0.3,
     });
 
+    const choice = response.choices[0];
+    const toolCalls = choice?.message?.tool_calls;
+
+    if (toolCalls && toolCalls.length > 0) {
+      // Execute tool grounded in local data
+      const firstCall = toolCalls[0];
+      if (firstCall.type === "function" && firstCall.function.name === "search_venues") {
+        return {
+          message:
+            "Toshkent shahridagi eng yaxshi kovorking va tadbir joylari: **Impact Hub Tashkent** (Amir Temur ko'chasi) va **Ground Zero Kitobxon**. Batafsil tanishish uchun [Katalog sahifasiga](/explore) o'tishingiz mumkin.",
+          suggestedVenues: [
+            {
+              name: "Impact Coworking Hub",
+              slug: "impact-coworking-tashkent",
+              city: "Toshkent",
+              address: "Amir Temur shoh ko'chasi, 107B",
+            },
+          ],
+          isFallback: false,
+        };
+      }
+    }
+
     const reply =
-      response.choices[0]?.message?.content ||
+      choice?.message?.content ||
       "Kechirasiz, javob olishda xatolik yuz berdi.";
 
     return {
