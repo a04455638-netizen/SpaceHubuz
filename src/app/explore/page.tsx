@@ -108,7 +108,13 @@ export default function ExplorePage() {
             onChange={(e) => setSelectedCity(e.target.value)}
             className="w-full rounded-xl border border-border bg-surface pl-9 pr-3 py-2 text-xs font-semibold text-ink focus:border-accent focus:outline-none cursor-pointer"
           >
-            <option value="all">Barcha shaharlar (Toshkent, Samarqand...)</option>
+            <option value="all">
+              {locale === "uz"
+                ? "Barcha shaharlar (Toshkent, Samarqand...)"
+                : locale === "ru"
+                  ? "Все города (Ташкент, Самарканд...)"
+                  : "All cities (Tashkent, Samarkand...)"}
+            </option>
             <option value="toshkent">Toshkent</option>
             <option value="samarqand">Samarqand</option>
             <option value="buxoro">Buxoro</option>

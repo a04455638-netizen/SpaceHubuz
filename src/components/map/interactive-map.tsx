@@ -13,6 +13,7 @@ interface InteractiveMapProps {
   center?: [number, number];
   zoom?: number;
   className?: string;
+  locale?: "uz" | "ru" | "en";
 }
 
 export default function InteractiveMap({
@@ -22,6 +23,7 @@ export default function InteractiveMap({
   center = [41.311081, 69.279737], // Tashkent city center
   zoom = 12,
   className = "h-[600px] w-full rounded-2xl",
+  locale = "uz",
 }: InteractiveMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -68,6 +70,32 @@ export default function InteractiveMap({
     // Clear existing markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current.clear();
+
+    const i18nText = {
+      uz: {
+        perHour: "/ soat",
+        viewDetails: "Batafsil",
+        directions: "Yo‘nalish ↗",
+        directionsTitle: "Google Maps orqali yo‘nalish olish",
+      },
+      ru: {
+        perHour: "/ час",
+        viewDetails: "Подробнее",
+        directions: "Маршрут ↗",
+        directionsTitle: "Открыть маршрут в Google Maps",
+      },
+      en: {
+        perHour: "/ hour",
+        viewDetails: "Details",
+        directions: "Directions ↗",
+        directionsTitle: "Get navigation directions in Google Maps",
+      },
+    }[locale] || {
+      perHour: "/ soat",
+      viewDetails: "Batafsil",
+      directions: "Yo‘nalish ↗",
+      directionsTitle: "Google Maps orqali yo‘nalish olish",
+    };
 
     const categoryIcons: Record<string, { bg: string; icon: string }> = {
       coworking: { bg: "#2563EB", icon: "💻" },
@@ -187,7 +215,7 @@ export default function InteractiveMap({
           ">
             <div style="font-weight: 800; font-size: 13px; color: #059669;">
               ${formatPrice(v.pricePerHour)} UZS
-              <span style="font-size: 10px; font-weight: normal; color: #64748B;">/ soat</span>
+              <span style="font-size: 10px; font-weight: normal; color: #64748B;">${i18nText.perHour}</span>
             </div>
             <div style="font-size: 11px; font-weight: 700; color: #D97706;">
               ★ ${v.rating.toFixed(1)}
@@ -208,7 +236,7 @@ export default function InteractiveMap({
                 text-decoration: none;
                 display: block;
               "
-            >Batafsil</a>
+            >${i18nText.viewDetails}</a>
             <a
               href="https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}"
               target="_blank"
@@ -226,8 +254,8 @@ export default function InteractiveMap({
                 display: block;
                 border: 1px solid #CBD5E1;
               "
-              title="Open directions in Google Maps"
-            >Yo‘nalish (Directions) ↗</a>
+              title="${i18nText.directionsTitle}"
+            >${i18nText.directions}</a>
           </div>
         </div>
       `;
@@ -252,7 +280,7 @@ export default function InteractiveMap({
     if (hasValidCoords && !selectedVenueId && venues.length > 1) {
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
-  }, [venues, selectedVenueId, onSelectVenue]);
+  }, [venues, selectedVenueId, onSelectVenue, locale]);
 
   // 3. Smooth Pan to Selected Venue when selectedVenueId changes
   useEffect(() => {

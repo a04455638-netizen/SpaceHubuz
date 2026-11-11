@@ -7,6 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import type { Locale, Translations } from "./types";
 import { getTranslation } from "./index";
 
@@ -31,6 +32,7 @@ export function I18nProvider({
   children,
   initialLocale = "uz",
 }: I18nProviderProps) {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   // Sync client-side if a valid locale exists in localStorage and differs from initial SSR
@@ -61,6 +63,11 @@ export function I18nProvider({
       localStorage.setItem("spacehub_locale", next);
       document.cookie = `spacehub_locale=${next}; path=/; max-age=31536000; SameSite=Lax`;
       document.documentElement.lang = next;
+    } catch {
+      // ignore
+    }
+    try {
+      router.refresh();
     } catch {
       // ignore
     }

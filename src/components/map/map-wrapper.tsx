@@ -22,6 +22,7 @@ interface MapWrapperProps {
   center?: [number, number];
   zoom?: number;
   className?: string;
+  locale?: "uz" | "ru" | "en";
 }
 
 export function MapWrapper(props: MapWrapperProps) {

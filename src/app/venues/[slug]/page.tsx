@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import {
   MapPin,
   Star,
@@ -20,6 +21,7 @@ import { findPublicVenue } from "../../../server/public-venues";
 import { CURATED_VENUES } from "../../../server/mock-venues";
 import { MapWrapper } from "@/components/map/map-wrapper";
 import { formatPrice } from "@/lib/format-price";
+import { getTranslation, type Locale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +45,26 @@ export default async function VenuePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const cookieStore = await cookies();
+  const savedLocale = cookieStore.get("spacehub_locale")?.value;
+  const locale: Locale =
+    savedLocale === "ru" || savedLocale === "en" || savedLocale === "uz"
+      ? savedLocale
+      : "uz";
+  const t = getTranslation(locale);
+
   const venue = (await findPublicVenue(slug)) || CURATED_VENUES[0];
   if (!venue) notFound();
 
   const mainResource = venue.resources[0];
   const bookingResourceId = mainResource?.id || "r-demo-1";
+
+  const description =
+    locale === "en"
+      ? venue.description?.en || venue.description?.uz || ""
+      : locale === "ru"
+        ? venue.description?.ru || venue.description?.uz || ""
+        : venue.description?.uz || "";
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
@@ -56,7 +73,12 @@ export default async function VenuePage({
         href="/explore"
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline"
       >
-        <ArrowLeft className="h-4 w-4" /> Barcha joylarga qaytish
+        <ArrowLeft className="h-4 w-4" />{" "}
+        {locale === "uz"
+          ? "Barcha joylarga qaytish"
+          : locale === "ru"
+            ? "Вернуться ко всем площадкам"
+            : "Back to all spaces"}
       </Link>
 
       {/* Title & Location Header */}
@@ -64,13 +86,22 @@ export default async function VenuePage({
         <div>
           <div className="flex items-center gap-2">
             <span className="rounded-lg bg-accent-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-accent">
-              {venue.category}
+              {venue.category === "coworking"
+                ? t.categories.work
+                : venue.category === "sports"
+                  ? t.categories.sports
+                  : venue.category === "meetings"
+                    ? t.categories.meetings
+                    : venue.category === "events"
+                      ? t.categories.events
+                      : venue.category}
             </span>
             <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-500">
-              <Star className="h-3.5 w-3.5 fill-amber-500" /> {venue.rating} ({venue.reviewCount} ta sharh)
+              <Star className="h-3.5 w-3.5 fill-amber-500" /> {venue.rating} ({venue.reviewCount}{" "}
+              {locale === "uz" ? "ta sharh" : locale === "ru" ? "отзывов" : "reviews"})
             </span>
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-status-success">
-              <ShieldCheck className="h-3.5 w-3.5" /> Tasdiqlangan
+              <ShieldCheck className="h-3.5 w-3.5" /> {t.common.verified}
             </span>
           </div>
 
@@ -147,9 +178,20 @@ export default async function VenuePage({
         <div className="lg:col-span-2 space-y-8">
           {/* Overview */}
           <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-ink">Joy haqida</h2>
+            <h2 className="text-lg font-bold text-ink">
+              {locale === "uz"
+                ? "Joy haqida"
+                : locale === "ru"
+                  ? "О площадке"
+                  : "About the Space"}
+            </h2>
             <p className="text-sm text-ink-muted leading-relaxed whitespace-pre-line">
-              {venue.description?.uz || "Toshkent shahridagi qulay va zamonaviy joy."}
+              {description ||
+                (locale === "uz"
+                  ? "Toshkent shahridagi qulay va zamonaviy joy."
+                  : locale === "ru"
+                    ? "Удобное современное пространство в Ташкенте."
+                    : "Comfortable and modern space in Tashkent.")}
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-border">
@@ -226,7 +268,13 @@ export default async function VenuePage({
           <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h2 className="text-lg font-bold text-ink">Manzil va Interaktiv Xarita</h2>
+                <h2 className="text-lg font-bold text-ink">
+                  {locale === "uz"
+                    ? "Manzil va Interaktiv Xarita"
+                    : locale === "ru"
+                      ? "Адрес и интерактивная карта"
+                      : "Location & Interactive Map"}
+                </h2>
                 <p className="text-xs text-ink-muted">{venue.address}, {venue.district}, {venue.city}</p>
               </div>
               <a
@@ -236,7 +284,7 @@ export default async function VenuePage({
                 className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-accent-hover transition self-start sm:self-auto"
               >
                 <Navigation className="h-3.5 w-3.5" />
-                <span>Yo‘nalishni ochish (Open Directions)</span>
+                <span>{t.map.openDirections}</span>
               </a>
             </div>
 
@@ -246,6 +294,7 @@ export default async function VenuePage({
                 selectedVenueId={venue.id}
                 center={[venue.latitude, venue.longitude]}
                 zoom={15}
+                locale={locale}
                 className="h-[280px] w-full"
               />
             </div>
@@ -258,7 +307,7 @@ export default async function VenuePage({
                 className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-muted transition"
               >
                 <ExternalLink className="h-3.5 w-3.5 text-accent" />
-                <span>Google Maps navigatsiya ↗</span>
+                <span>Google Maps {locale === "uz" ? "navigatsiya" : locale === "ru" ? "навигация" : "directions"} ↗</span>
               </a>
               <a
                 href={`https://yandex.uz/maps/?rtext=~${venue.latitude},${venue.longitude}`}
@@ -280,21 +329,21 @@ export default async function VenuePage({
               <span className="text-2xl font-black text-ink">
                 {formatPrice(venue.pricePerHour)} UZS
               </span>
-              <span className="text-xs text-ink-muted"> / soatiga</span>
+              <span className="text-xs text-ink-muted"> / {locale === "uz" ? "soatiga" : locale === "ru" ? "в час" : "per hour"}</span>
             </div>
 
             <div className="rounded-xl border border-border bg-surface p-4 text-xs space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-ink-muted">Reyting:</span>
-                <span className="font-bold text-amber-500">★ {venue.rating} ({venue.reviewCount} sharh)</span>
+                <span className="text-ink-muted">{locale === "uz" ? "Reyting:" : locale === "ru" ? "Рейтинг:" : "Rating:"}</span>
+                <span className="font-bold text-amber-500">★ {venue.rating} ({venue.reviewCount} {locale === "uz" ? "sharh" : locale === "ru" ? "отзывов" : "reviews"})</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-ink-muted">Kafolatlangan joy:</span>
-                <span className="font-bold text-status-success">Ha (Real vaqt)</span>
+                <span className="text-ink-muted">{locale === "uz" ? "Kafolatlangan joy:" : locale === "ru" ? "Гарантия места:" : "Guaranteed spot:"}</span>
+                <span className="font-bold text-status-success">{locale === "uz" ? "Ha (Real vaqt)" : locale === "ru" ? "Да (Онлайн)" : "Yes (Real-time)"}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-ink-muted">Bekor qilish:</span>
-                <span className="font-semibold text-ink">24 soat oldin bepul</span>
+                <span className="text-ink-muted">{locale === "uz" ? "Bekor qilish:" : locale === "ru" ? "Отмена:" : "Cancellation:"}</span>
+                <span className="font-semibold text-ink">{locale === "uz" ? "24 soat oldin bepul" : locale === "ru" ? "Бесплатно за 24 ч." : "Free up to 24h prior"}</span>
               </div>
             </div>
 

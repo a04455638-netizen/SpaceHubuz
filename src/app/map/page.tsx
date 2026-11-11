@@ -112,7 +112,19 @@ export default function MapDiscoveryPage() {
               }
             >
               <Database className="h-3 w-3" />
-              <span>{isLiveDatabase ? "Supabase Live" : "Verified GPS"}</span>
+              <span>
+                {isLiveDatabase
+                  ? locale === "uz"
+                    ? "Supabase Jonli"
+                    : locale === "ru"
+                      ? "Supabase Онлайн"
+                      : "Supabase Live"
+                  : locale === "uz"
+                    ? "Tasdiqlangan GPS"
+                    : locale === "ru"
+                      ? "Проверенный GPS"
+                      : "Verified GPS"}
+              </span>
             </span>
           </div>
           <p className="mt-1 text-sm text-ink-muted">
@@ -121,7 +133,13 @@ export default function MapDiscoveryPage() {
         </div>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1.5 rounded-xl border border-border bg-surface-card px-3 py-1.5 text-xs font-semibold text-ink shadow-sm">
-            <Navigation className="h-3.5 w-3.5 text-accent" /> Toshkent markazi (41.3111&deg; N, 69.2797&deg; E)
+            <Navigation className="h-3.5 w-3.5 text-accent" />{" "}
+            {locale === "uz"
+              ? "Toshkent markazi"
+              : locale === "ru"
+                ? "Центр Ташкента"
+                : "Tashkent City Center"}{" "}
+            (41.3111&deg; N, 69.2797&deg; E)
           </span>
         </div>
       </div>
@@ -152,7 +170,13 @@ export default function MapDiscoveryPage() {
         {loading && (
           <span className="flex items-center gap-1 text-xs text-ink-muted ml-2">
             <RefreshCw className="h-3 w-3 animate-spin text-accent" />
-            <span>Yangilanmoqda...</span>
+            <span>
+              {locale === "uz"
+                ? "Yangilanmoqda..."
+                : locale === "ru"
+                  ? "Обновление..."
+                  : "Updating..."}
+            </span>
           </span>
         )}
       </div>
@@ -202,7 +226,15 @@ export default function MapDiscoveryPage() {
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
-                          {venue.category}
+                          {venue.category === "coworking"
+                            ? t.categories.work
+                            : venue.category === "sports"
+                              ? t.categories.sports
+                              : venue.category === "meetings"
+                                ? t.categories.meetings
+                                : venue.category === "events"
+                                  ? t.categories.events
+                                  : venue.category}
                         </span>
                         <span className="flex items-center gap-0.5 text-xs font-bold text-amber-500">
                           <Star className="h-3 w-3 fill-amber-500" /> {venue.rating.toFixed(1)}
@@ -219,7 +251,10 @@ export default function MapDiscoveryPage() {
                     <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
                       <span className="text-xs font-extrabold text-ink">
                         {formatPrice(venue.pricePerHour)} UZS
-                        <span className="text-[10px] font-normal text-ink-muted"> / soat</span>
+                        <span className="text-[10px] font-normal text-ink-muted">
+                          {" "}
+                          / {locale === "uz" ? "soat" : locale === "ru" ? "час" : "hour"}
+                        </span>
                       </span>
                       <Link
                         href={`/venues/${venue.slug}`}
@@ -244,6 +279,7 @@ export default function MapDiscoveryPage() {
               venues={filteredVenues}
               selectedVenueId={selectedVenue?.id}
               onSelectVenue={(v) => setSelectedVenue(v)}
+              locale={locale}
               className="h-[420px] lg:h-[580px] w-full"
             />
           </div>
@@ -266,7 +302,7 @@ export default function MapDiscoveryPage() {
                   title="Open navigation directions in Google Maps"
                 >
                   <Navigation className="h-3.5 w-3.5" />
-                  <span>Yo‘nalishni ochish (Open Directions)</span>
+                  <span>{t.map.openDirections}</span>
                 </a>
                 <a
                   href={`https://yandex.uz/maps/?rtext=~${selectedVenue.latitude},${selectedVenue.longitude}`}
@@ -282,7 +318,7 @@ export default function MapDiscoveryPage() {
                   href={`/venues/${selectedVenue.slug}`}
                   className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface px-4 py-1.5 text-xs font-bold text-ink hover:bg-surface-muted transition shadow-sm"
                 >
-                  <span>{locale === "uz" ? "Batafsil ma’lumot" : locale === "ru" ? "Подробнее" : "Details"}</span>
+                  <span>{t.common.viewDetails}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
