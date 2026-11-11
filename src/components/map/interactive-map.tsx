@@ -214,10 +214,11 @@ export default function InteractiveMap({
               "
             >Batafsil</a>
             <a
-              href="https://maps.google.com/?q=${v.latitude},${v.longitude}"
+              href="https://www.google.com/maps/dir/?api=1&destination=${v.latitude},${v.longitude}"
               target="_blank"
               rel="noopener noreferrer"
               style="
+                flex: 1;
                 text-align: center;
                 background-color: #F1F5F9;
                 color: #0F172A;
@@ -227,9 +228,10 @@ export default function InteractiveMap({
                 font-weight: 600;
                 text-decoration: none;
                 display: block;
+                border: 1px solid #CBD5E1;
               "
-              title="Google Maps"
-            >Maps ↗</a>
+              title="Open directions in Google Maps"
+            >Yo‘nalish (Directions) ↗</a>
           </div>
         </div>
       `;

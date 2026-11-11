@@ -258,30 +258,30 @@ export default function MapDiscoveryPage() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <a
-                  href={`https://maps.google.com/?q=${selectedVenue.latitude},${selectedVenue.longitude}`}
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedVenue.latitude},${selectedVenue.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface-card px-3 py-1.5 text-xs font-bold text-ink hover:bg-surface-muted transition"
-                  title="Open in Google Maps"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-accent-hover transition"
+                  title="Open navigation directions in Google Maps"
                 >
-                  <ExternalLink className="h-3.5 w-3.5 text-accent" />
-                  <span>Google Maps</span>
+                  <Navigation className="h-3.5 w-3.5" />
+                  <span>Yo‘nalishni ochish (Open Directions)</span>
                 </a>
                 <a
-                  href={`https://yandex.uz/maps/?pt=${selectedVenue.longitude},${selectedVenue.latitude}&z=16&l=map`}
+                  href={`https://yandex.uz/maps/?rtext=~${selectedVenue.latitude},${selectedVenue.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface-card px-3 py-1.5 text-xs font-bold text-ink hover:bg-surface-muted transition"
-                  title="Open in Yandex Maps"
+                  title="Open in Yandex Navigator"
                 >
                   <ExternalLink className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Yandex Maps</span>
+                  <span>Yandex Navigator</span>
                 </a>
                 <Link
                   href={`/venues/${selectedVenue.slug}`}
-                  className="inline-flex items-center gap-1 rounded-xl bg-accent px-4 py-1.5 text-xs font-bold text-white hover:bg-accent-hover transition shadow-sm"
+                  className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface px-4 py-1.5 text-xs font-bold text-ink hover:bg-surface-muted transition shadow-sm"
                 >
-                  <span>{locale === "uz" ? "Bron qilish" : locale === "ru" ? "Забронировать" : "Book now"}</span>
+                  <span>{locale === "uz" ? "Batafsil ma’lumot" : locale === "ru" ? "Подробнее" : "Details"}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>

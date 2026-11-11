@@ -14,9 +14,11 @@ import {
   Phone,
   Mail,
   Calendar,
+  Navigation,
 } from "lucide-react";
 import { findPublicVenue } from "../../../server/public-venues";
 import { CURATED_VENUES } from "../../../server/mock-venues";
+import { MapWrapper } from "@/components/map/map-wrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -221,38 +223,50 @@ export default async function VenuePage({
 
           {/* Location Map Preview */}
           <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-ink">Manzil va Xarita</h2>
-            <p className="text-xs text-ink-muted">{venue.address}, {venue.district}, {venue.city}</p>
-            <div className="relative h-[250px] w-full rounded-xl overflow-hidden border border-border">
-              <iframe
-                title="Venue Location Map"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                scrolling="no"
-                marginHeight={0}
-                marginWidth={0}
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${venue.longitude - 0.01}%2C${venue.latitude - 0.008}%2C${venue.longitude + 0.01}%2C${venue.latitude + 0.008}&amp;layer=mapnik&amp;marker=${venue.latitude}%2C${venue.longitude}`}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-ink">Manzil va Interaktiv Xarita</h2>
+                <p className="text-xs text-ink-muted">{venue.address}, {venue.district}, {venue.city}</p>
+              </div>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-accent-hover transition self-start sm:self-auto"
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                <span>Yo‘nalishni ochish (Open Directions)</span>
+              </a>
+            </div>
+
+            <div className="relative h-[280px] w-full rounded-xl overflow-hidden border border-border">
+              <MapWrapper
+                venues={[venue]}
+                selectedVenueId={venue.id}
+                center={[venue.latitude, venue.longitude]}
+                zoom={15}
+                className="h-[280px] w-full"
               />
             </div>
+
             <div className="flex flex-wrap gap-2 pt-1">
               <a
-                href={`https://maps.google.com/?q=${venue.latitude},${venue.longitude}`}
+                href={`https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-muted transition"
               >
                 <ExternalLink className="h-3.5 w-3.5 text-accent" />
-                <span>Google Maps orqali ochish</span>
+                <span>Google Maps navigatsiya ↗</span>
               </a>
               <a
-                href={`https://yandex.uz/maps/?pt=${venue.longitude},${venue.latitude}&z=16&l=map`}
+                href={`https://yandex.uz/maps/?rtext=~${venue.latitude},${venue.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-muted transition"
               >
                 <ExternalLink className="h-3.5 w-3.5 text-amber-500" />
-                <span>Yandex Maps orqali ochish</span>
+                <span>Yandex Navigator ↗</span>
               </a>
             </div>
           </div>

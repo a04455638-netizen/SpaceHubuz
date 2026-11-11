@@ -2,7 +2,8 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Check } from "lucide-react";
+import { ArrowLeft, Save, Check, MapPin } from "lucide-react";
+import { LocationPickerWrapper } from "@/components/map/location-picker-wrapper";
 
 export default function EditVenuePage({
   params,
@@ -13,6 +14,8 @@ export default function EditVenuePage({
   const [name, setName] = useState("C-Space Mirabad");
   const [city, setCity] = useState("Toshkent");
   const [address, setAddress] = useState("Mirobod tumani, Nukus ko‘chasi, 29");
+  const [latitude, setLatitude] = useState(41.2985);
+  const [longitude, setLongitude] = useState(69.2735);
   const [cancellationPolicy, setCancellationPolicy] = useState("flexible_24h");
   const [saved, setSaved] = useState(false);
 
@@ -90,6 +93,30 @@ export default function EditVenuePage({
               className="mt-1.5 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
             />
           </div>
+        </div>
+
+        {/* Interactive Location Picker */}
+        <div className="space-y-2 pt-2 border-t border-border">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 text-accent" />
+              Xaritadagi joylashuv (Kenglik / Uzunlik)
+            </span>
+            <span className="font-mono text-[11px] font-semibold text-accent bg-accent-subtle px-2 py-0.5 rounded-md">
+              {latitude.toFixed(6)}, {longitude.toFixed(6)}
+            </span>
+          </div>
+          <p className="text-[11px] text-ink-muted">
+            Markerni surib, binoning xaritadagi joyini yangilang.
+          </p>
+          <LocationPickerWrapper
+            latitude={latitude}
+            longitude={longitude}
+            onChange={(lat, lng) => {
+              setLatitude(lat);
+              setLongitude(lng);
+            }}
+          />
         </div>
 
         <div>
