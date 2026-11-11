@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle2, ArrowLeft, Clock, ShieldCheck, AlertCircle } from "lucide-react";
+import { formatPrice } from "@/lib/format-price";
 
 interface BookingDetail {
   id: string;
@@ -89,6 +90,39 @@ export default function CheckoutPage({
         return;
       }
 
+      // Persist to user's bookings list
+      try {
+        const raw = localStorage.getItem("spacehub_customer_bookings");
+        const list = raw ? JSON.parse(raw) : [];
+        const newBooking = {
+          id: bookingId,
+          venueName:
+            booking?.resource?.venue?.name ||
+            booking?.resource?.name ||
+            "SpaceHub Workspace",
+          address: booking?.resource?.venue?.address || "Toshkent shahri",
+          date: booking?.startsAt
+            ? booking.startsAt.split("T")[0]
+            : new Date().toISOString().split("T")[0],
+          time: booking?.startsAt
+            ? `${booking.startsAt.slice(11, 16)} – ${booking.endsAt.slice(11, 16)}`
+            : "10:00 – 12:00",
+          amount: booking?.totalAmount || 50000,
+          status: "CONFIRMED",
+          paymentMethod: providerMap[paymentMethod],
+        };
+        const updated = [
+          newBooking,
+          ...list.filter((b: { id: string }) => b.id !== bookingId),
+        ];
+        localStorage.setItem(
+          "spacehub_customer_bookings",
+          JSON.stringify(updated)
+        );
+      } catch {
+        // ignore
+      }
+
       setConfirmed(true);
     } catch {
       setError("Tarmoq xatosi. Iltimos qaytadan urinib ko'ring.");
@@ -135,7 +169,7 @@ export default function CheckoutPage({
             </div>
             <div className="flex justify-between">
               <span className="text-ink-muted">To&apos;langan summa:</span>
-              <span className="font-bold text-accent">{(booking?.totalAmount || 52500).toLocaleString()} UZS</span>
+              <span className="font-bold text-accent">{formatPrice(booking?.totalAmount || 52500)} UZS</span>
             </div>
             <div className="flex justify-between">
               <span className="text-ink-muted">Holat:</span>
@@ -209,7 +243,7 @@ export default function CheckoutPage({
           <div className="flex justify-between">
             <span className="text-ink-muted">Umumiy to&apos;lov:</span>
             <span className="font-extrabold text-accent text-sm">
-              {(booking?.totalAmount || 52500).toLocaleString()} UZS
+              {formatPrice(booking?.totalAmount || 52500)} UZS
             </span>
           </div>
         </div>

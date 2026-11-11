@@ -15,6 +15,7 @@ import {
 import { CURATED_VENUES, type CuratedVenue } from "@/server/mock-venues";
 import { MapWrapper } from "@/components/map/map-wrapper";
 import { useI18n } from "@/lib/i18n";
+import { formatPrice } from "@/lib/format-price";
 
 export default function MapDiscoveryPage() {
   const { t, locale } = useI18n();
@@ -217,7 +218,7 @@ export default function MapDiscoveryPage() {
 
                     <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
                       <span className="text-xs font-extrabold text-ink">
-                        {venue.pricePerHour.toLocaleString("uz-UZ")} UZS
+                        {formatPrice(venue.pricePerHour)} UZS
                         <span className="text-[10px] font-normal text-ink-muted"> / soat</span>
                       </span>
                       <Link

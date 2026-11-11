@@ -101,28 +101,33 @@ export function getSystemPrompt(locale: "uz" | "ru" | "en" = "uz"): string {
   switch (locale) {
     case "ru":
       return `Вы — официальный AI-консьерж платформы SpaceHub UZ (бронирование коворкингов, спортивных площадок, конференц-залов и банкетных холлов в Узбекистане).
-Требования:
-1. Отвечайте вежливо и ТОЛЬКО на русском языке (если пользователь не попросит другой язык).
-2. Опирайтесь только на реальные подтвержденные данные площадок Ташкента и Узбекистана.
-3. Помогайте пользователю выбрать площадку, уточняйте вместимость и район, рекомендуйте забронировать через карточку площадки.
-4. Никогда не придумывайте фальшивые цены или адреса.`;
+СТРОГИЕ ПРАВИЛА ЯЗЫКА:
+1. Язык интерфейса сайта — РУССКИЙ.
+2. Если пользователь пишет на узбекском, английском или другом языке, вежливо ответьте на РУССКОМ: "Извините, я вас не понял. Пожалуйста, напишите ваш вопрос на русском языке, так как на сайте выбран русский язык. (Вы также можете переключить язык сайта в верхнем меню)."
+3. Отвечайте вежливо и ТОЛЬКО на русском языке.
+4. Опирайтесь только на реальные подтвержденные данные площадок Ташкента и Узбекистана.
+5. Помогайте пользователю выбрать площадку, уточняйте вместимость и район, рекомендуйте забронировать через карточку площадки.
+6. Никогда не придумывайте фальшивые цены или адреса.`;
 
     case "en":
       return `You are the official AI Concierge for SpaceHub UZ (marketplace for coworking desks, sports arenas, conference rooms, and event halls across Uzbekistan).
-Guidelines:
-1. Respond politely and naturally in ENGLISH (unless user explicitly requests another language).
-2. Strictly use verified data about real venues in Tashkent and Uzbekistan.
-3. Assist with recommendations, capacity checks, and booking steps.
-4. Never invent nonexistent venues, addresses, or prices.`;
+STRICT LANGUAGE DIRECTIVE:
+1. The user's active website language is ENGLISH.
+2. If the user writes in Uzbek, Russian, or any other language, you MUST respond in ENGLISH stating: "I did not understand your message in that language. Please ask your question in English, as your selected interface language is English. (Or you can switch the website language in the top navigation menu)."
+3. Always respond strictly in English.
+4. Use verified data about real venues in Tashkent and Uzbekistan.
+5. Assist with recommendations, capacity checks, and booking steps.
+6. Never invent nonexistent venues, addresses, or prices.`;
 
     case "uz":
     default:
       return `Sen SpaceHub UZ platformasining aqlli yordamchisi (AI Concierge)san.
-Vazifang: O'zbekiston bo'ylab kovorkinglar, sport maydonlari, konferensiya va tadbir joylarini topish va bron qilishda foydalanuvchilarga yordam berish.
-Qoidalar:
-1. Foydalanuvchiga xushmuomala bo'l va javobni O'ZBEK tilida ber.
-2. Faqat haqiqiy tasdiqlangan ma'lumotlar bilan javob ber. Hech qachon soxta manzil, narx yoki joy nomini to'qib chiqarma.
-3. Foydalanuvchini platformadagi to'g'ri joy sahifasiga yo'naltir.`;
+TIL BO'YICHA QAT'IY QOIDA:
+1. Saytning tanlangan interfeys tili — O'ZBEKCHA.
+2. Agar foydalanuvchi ingliz yoki rus tilida yozsa, o'zbek tilida: "Kechirasiz, men sizni to'liq tushunmadim. Iltimos, savolingizni o'zbek tilida bering, chunki sayt tili o'zbekcha qilib tanlangan. (Yoki yuqori menyudan sayt tilini o'zgartirishingiz mumkin)." deb javob ber.
+3. Barcha javoblarni xushmuomala tarzda O'ZBEK tilida ber.
+4. Faqat haqiqiy tasdiqlangan ma'lumotlar bilan javob ber. Hech qachon soxta manzil, narx yoki joy nomini to'qib chiqarma.
+5. Foydalanuvchini platformadagi to'g'ri joy sahifasiga yo'naltir.`;
   }
 }
 
@@ -135,10 +140,11 @@ export function generateFallbackResponse(
   categories: readonly CategorySummary[] = CORE_CATEGORIES,
   locale: "uz" | "ru" | "en" = "uz",
 ): ConciergeResponse {
+  const safeCategories: readonly CategorySummary[] = Array.isArray(categories) ? categories : CORE_CATEGORIES;
   const query = userQuery.toLowerCase().trim();
 
   // Search matching categories
-  const matchedCategories = categories.filter(
+  const matchedCategories = safeCategories.filter(
     (c) =>
       query.includes(c.id) ||
       query.includes(c.name.toLowerCase()) ||
@@ -150,7 +156,26 @@ export function generateFallbackResponse(
   const isMeetings = query.includes("majlis") || query.includes("konferens") || query.includes("переговорная") || query.includes("конференц") || query.includes("meeting");
   const isEvents = query.includes("tadbir") || query.includes("banket") || query.includes("банкет") || query.includes("мероприятие") || query.includes("event");
 
+  const isUzbekQuery =
+    /\b(salom|qanday|qayerda|kerak|joy|bron|qancha|narxi|xona|maydon|bor|menga|rahmat|iltimos|uchun|qilish|bormi|qayer|ish|yaxshi)\b/i.test(query) ||
+    query.includes("o'zbek") ||
+    query.includes("ozbek");
+
+  const isRussianQuery = /[а-яё]/i.test(query);
+
+  const isEnglishQuery =
+    /\b(hello|hi|hey|where|how|what|need|book|booking|price|cost|room|arena|space|tashkent|which|good|desk)\b/i.test(query);
+
   if (locale === "ru") {
+    // If interface is Russian, but query is Uzbek or English
+    if (isUzbekQuery && !isRussianQuery) {
+      return {
+        message:
+          "Извините, я не понял ваше сообщение на этом языке. Пожалуйста, напишите ваш вопрос на русском языке, так как на сайте выбран русский язык. (Вы также можете переключить язык на O‘zbekcha в верхнем меню). Чем я могу вам помочь?",
+        isFallback: true,
+      };
+    }
+
     if (isCoworking) {
       return {
         message: `В Ташкенте рекомендуем **Impact Hub Tashkent** (Юнусабад, Amir Temur) со скоростным интернетом 500 Мбит/с или **C-Space Mirabad** (Мирабад, Nukus). Все коворкинги доступны для бронирования в нашем [Каталоге](/explore?category=coworking). Сколько рабочих мест вам требуется?`,
@@ -178,6 +203,15 @@ export function generateFallbackResponse(
   }
 
   if (locale === "en") {
+    // If the active site language is English, but user wrote in Uzbek or Russian
+    if ((isUzbekQuery || isRussianQuery) && !isEnglishQuery) {
+      return {
+        message:
+          "I didn't understand your message in that language. Please ask your question in English, as your selected website language is English. (If you prefer Uzbek, you can switch the website language to O‘zbekcha from the top menu). How can I assist you with booking a space today?",
+        isFallback: true,
+      };
+    }
+
     if (isCoworking) {
       return {
         message: `In Tashkent, we recommend **Impact Hub Tashkent** (Yunusabad district) with 500 Mbps fiber internet or **C-Space Mirabad Avenue**. You can browse and book slots directly in our [Coworking Catalog](/explore?category=coworking). How many desks do you need?`,
@@ -204,6 +238,13 @@ export function generateFallbackResponse(
   }
 
   // Default Uzbek
+  if (isEnglishQuery && !isUzbekQuery) {
+    return {
+      message:
+        "Kechirasiz, men sizning savolingizni to'liq tushunmadim. Sayt tili o'zbekcha qilib tanlangani sababli, iltimos, savolingizni o'zbek tilida bering. (Yoki yuqoridagi menyudan sayt tilini English ga o'zgartirishingiz mumkin). Sizga qanday joy kerak?",
+      isFallback: true,
+    };
+  }
   if (isCoworking || matchedCategories.some((c) => c.id === "coworking")) {
     return {
       message: `Toshkentda ishlash va o'qish uchun **Impact Hub Tashkent** (Yunusobod tumani, 500 Mbit/s optik internet) yoki **C-Space Mirabad** (Mirobod tumani) ajoyib tanlov. Barcha kovorkinglarni ko'rish uchun [Katalogimizga](/explore?category=coworking) o'tishingiz mumkin. Nechta o'rin kerak sizga?`,
@@ -257,9 +298,25 @@ export function generateFallbackResponse(
  */
 export async function askConcierge(
   messages: ConciergeMessage[],
-  categories?: readonly CategorySummary[],
-  locale: "uz" | "ru" | "en" = "uz",
+  categoriesOrOptions?:
+    | readonly CategorySummary[]
+    | { categories?: readonly CategorySummary[]; locale?: "uz" | "ru" | "en" },
+  maybeLocale: "uz" | "ru" | "en" = "uz",
 ): Promise<ConciergeResponse> {
+  let categories: readonly CategorySummary[] = CORE_CATEGORIES;
+  let locale: "uz" | "ru" | "en" = maybeLocale;
+
+  if (Array.isArray(categoriesOrOptions)) {
+    categories = categoriesOrOptions;
+  } else if (categoriesOrOptions && typeof categoriesOrOptions === "object") {
+    if ("categories" in categoriesOrOptions && Array.isArray(categoriesOrOptions.categories)) {
+      categories = categoriesOrOptions.categories;
+    }
+    if ("locale" in categoriesOrOptions && categoriesOrOptions.locale) {
+      locale = categoriesOrOptions.locale;
+    }
+  }
+
   const client = getOpenAIClient();
   const lastUserMessage =
     [...messages].reverse().find((m) => m.role === "user")?.content || "";

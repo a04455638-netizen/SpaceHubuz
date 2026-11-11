@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   MapPin,
   ArrowLeft,
@@ -9,12 +10,14 @@ import {
   CheckCircle2,
   Navigation,
 } from "lucide-react";
+import { formatPrice } from "@/lib/format-price";
 
 export default function BookingDetailPage({
   params,
 }: {
   params: Promise<{ bookingId: string }>;
 }) {
+  const router = useRouter();
   const { bookingId } = use(params);
   const [booking, setBooking] = useState<{
     id: string;
@@ -53,17 +56,14 @@ export default function BookingDetailPage({
   }, [bookingId]);
 
   function handleCancel() {
-    if (!confirm("Haqiqatan ham bu buyurtmani bekor qilmoqchimisiz?")) return;
-    setBooking((prev) => ({ ...prev, status: "CANCELLED" }));
+    if (!confirm("Haqiqatan ham bu buyurtmani bekor qilib, ro‘yxatdan o‘chirmoqchimisiz?")) return;
 
-    // Update in localStorage
+    // Remove from localStorage
     const raw = localStorage.getItem("spacehub_customer_bookings");
     if (raw) {
       try {
         const list = JSON.parse(raw);
-        const updated = list.map((b: { id: string }) =>
-          b.id === bookingId ? { ...b, status: "CANCELLED" } : b,
-        );
+        const updated = list.filter((b: { id: string }) => b.id !== bookingId);
         localStorage.setItem(
           "spacehub_customer_bookings",
           JSON.stringify(updated),
@@ -72,6 +72,16 @@ export default function BookingDetailPage({
         // ignore
       }
     }
+
+    // Release slot in backend
+    fetch("/api/bookings/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId, reason: "Customer cancelled and removed" }),
+    }).catch(() => {});
+
+    // Redirect to bookings list
+    router.push("/account/bookings");
   }
 
   return (
@@ -107,7 +117,7 @@ export default function BookingDetailPage({
         <div className="text-left sm:text-right">
           <span className="text-xs text-ink-subtle">To‘langan summa:</span>
           <p className="text-xl font-extrabold text-accent">
-            {booking.amount.toLocaleString("uz-UZ")} so‘m
+            {formatPrice(booking.amount)} so‘m
           </p>
           <span className="text-xs text-ink-subtle">
             Usul: {booking.paymentMethod}

@@ -22,3 +22,13 @@ test("AI Concierge handles general inquiry gracefully", async () => {
   assert.equal(result.isFallback, true);
   assert.ok(result.message.includes("SpaceHub"));
 });
+
+test("AI Concierge politely rejects Uzbek query when active site language is English", async () => {
+  const result = await askConcierge(
+    [{ role: "user", content: "Menga yaxshi futsal maydon kerak" }],
+    { locale: "en" }
+  );
+
+  assert.equal(result.isFallback, true);
+  assert.ok(result.message.includes("English"));
+});

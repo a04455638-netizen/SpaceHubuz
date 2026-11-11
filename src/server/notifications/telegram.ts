@@ -1,3 +1,5 @@
+import { formatPrice } from "../../lib/format-price.ts";
+
 export interface TelegramAlertResult {
   success: boolean;
   simulated: boolean;
@@ -26,7 +28,11 @@ export async function sendTelegramAlert(
   options?: { parseMode?: "Markdown" | "HTML" }
 ): Promise<TelegramAlertResult> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_ADMIN_CHAT_ID;
+  const chatId =
+    process.env.TELEGRAM_CHAT_ID ||
+    process.env.TELEGRAM_ADMIN_CHAT_ID ||
+    process.env.TELEGRAM_OWNER_CHAT_ID ||
+    process.env.TELEGRAM_CHANNEL_ID;
 
   if (token && chatId) {
     try {
@@ -42,6 +48,13 @@ export async function sendTelegramAlert(
 
       if (!res.ok) {
         const errData = await res.text();
+        console.warn(`[TELEGRAM DISPATCH WARNING ${res.status}]: ${errData}`);
+        if (errData.includes("chat not found")) {
+          console.warn(
+            `\n⚠️ DIQQAT: Telegram bot (@SpaceHubUZ_bot) ${chatId} ID raqamiga xabar yubora olmadi.\n` +
+            `👉 Sababi: Telegram qoidasiga binoan, bot sizga xabar yuborishi uchun siz avval Telegramda @SpaceHubUZ_bot ga kirib "START" (/start) tugmasini bosishingiz kerak!\n`
+          );
+        }
         return {
           success: false,
           simulated: false,
@@ -57,6 +70,7 @@ export async function sendTelegramAlert(
       };
     } catch (e: unknown) {
       const errMsg = e instanceof Error ? e.message : "Network error";
+      console.warn(`[TELEGRAM NETWORK ERROR]: ${errMsg}`);
       return { success: false, simulated: false, error: errMsg };
     }
   }
@@ -84,7 +98,7 @@ ${payload.paymentMethod ? `<b>To'lov usuli:</b> <code>${payload.paymentMethod}</
 <b>Sana:</b> ${payload.date}
 <b>Vaqt:</b> ${payload.startTime} — ${payload.endTime}
 ━━━━━━━━━━━━━━━━━━
-<b>Umumiy summa:</b> <b>${payload.totalPrice.toLocaleString()} UZS</b>
+<b>Umumiy summa:</b> <b>${formatPrice(payload.totalPrice)} UZS</b>
 `.trim();
 
   return sendTelegramAlert(html, { parseMode: "HTML" });

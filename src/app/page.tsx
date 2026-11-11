@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
 import { CURATED_VENUES } from "@/server/mock-venues";
+import { formatPrice } from "@/lib/format-price";
 
 export default function Home() {
   const { t, locale } = useI18n();
@@ -76,7 +77,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-surface">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-ink py-20 sm:py-28 text-white">
+      <section className="relative overflow-hidden bg-slate-950 py-20 sm:py-28 text-white">
         <div className="absolute inset-0 opacity-25 pointer-events-none">
           <Image
             src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1920&q=80"
@@ -85,7 +86,7 @@ export default function Home() {
             className="object-cover object-center"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/90 via-ink/80 to-ink" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/80 to-slate-950" />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-5 sm:px-6">
@@ -324,7 +325,7 @@ export default function Home() {
                       fill
                       className="object-cover transition duration-300 group-hover:scale-105"
                     />
-                    <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                    <span className="absolute left-3 top-3 rounded-full bg-slate-900/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                       {venue.categoryName[locale]}
                     </span>
                   </div>
@@ -354,7 +355,7 @@ export default function Home() {
                       {locale === "uz" ? "Narxi:" : locale === "ru" ? "Цена:" : "From:"}
                     </span>
                     <p className="text-sm font-extrabold text-ink">
-                      {venue.pricePerHour.toLocaleString("uz-UZ")} {t.common.currency}
+                      {formatPrice(venue.pricePerHour)} {t.common.currency}
                       <span className="text-xs font-normal text-ink-muted">
                         {" "}/ {locale === "uz" ? "soat" : locale === "ru" ? "час" : "hour"}
                       </span>

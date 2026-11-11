@@ -83,28 +83,28 @@ export function Navbar() {
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-muted hover:text-accent"
           >
             <Compass className="h-4 w-4 text-accent" />
-            {t.nav.explore}
+            <span suppressHydrationWarning>{t.nav.explore}</span>
           </Link>
           <Link
             href="/map"
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-muted hover:text-accent"
           >
             <MapPin className="h-4 w-4 text-accent" />
-            {t.nav.map}
+            <span suppressHydrationWarning>{t.nav.map}</span>
           </Link>
           <Link
             href="/compare"
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-muted hover:text-accent"
           >
             <GitCompare className="h-4 w-4 text-accent" />
-            {t.nav.compare}
+            <span suppressHydrationWarning>{t.nav.compare}</span>
           </Link>
           <Link
             href="/ai-assistant"
             className="flex items-center gap-1.5 rounded-lg bg-accent-subtle px-3 py-2 text-sm font-semibold text-accent transition hover:opacity-90"
           >
             <Sparkles className="h-4 w-4" />
-            {t.nav.aiAssistant}
+            <span suppressHydrationWarning>{t.nav.aiAssistant}</span>
           </Link>
         </nav>
 
@@ -144,7 +144,7 @@ export function Navbar() {
             className="flex items-center gap-1.5 rounded-lg border border-border bg-surface-card px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-accent hover:text-accent"
           >
             <Calendar className="h-3.5 w-3.5 text-accent" />
-            <span className="hidden lg:inline">{t.nav.myBookings}</span>
+            <span className="hidden lg:inline" suppressHydrationWarning>{t.nav.myBookings}</span>
           </Link>
 
           <Link
@@ -211,7 +211,7 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
               >
                 <Compass className="h-4 w-4 text-accent" />
-                {t.nav.explore}
+                <span suppressHydrationWarning>{t.nav.explore}</span>
               </Link>
               <Link
                 href="/map"
@@ -219,7 +219,7 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
               >
                 <MapPin className="h-4 w-4 text-accent" />
-                {t.nav.map}
+                <span suppressHydrationWarning>{t.nav.map}</span>
               </Link>
               <Link
                 href="/compare"
@@ -227,7 +227,7 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
               >
                 <GitCompare className="h-4 w-4 text-accent" />
-                {t.nav.compare}
+                <span suppressHydrationWarning>{t.nav.compare}</span>
               </Link>
               <Link
                 href="/ai-assistant"
@@ -235,7 +235,7 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-lg bg-accent-subtle px-3 py-2 text-sm font-bold text-accent"
               >
                 <Sparkles className="h-4 w-4" />
-                {t.nav.aiAssistant}
+                <span suppressHydrationWarning>{t.nav.aiAssistant}</span>
               </Link>
               <Link
                 href="/account/bookings"
@@ -243,7 +243,7 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
               >
                 <Calendar className="h-4 w-4 text-accent" />
-                {t.nav.myBookings}
+                <span suppressHydrationWarning>{t.nav.myBookings}</span>
               </Link>
               <Link
                 href="/account/favorites"
@@ -251,7 +251,7 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
               >
                 <Heart className="h-4 w-4 text-accent" />
-                {t.nav.favorites}
+                <span suppressHydrationWarning>{t.nav.favorites}</span>
               </Link>
               <Link
                 href="/account/profile"
@@ -259,7 +259,7 @@ export function Navbar() {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-muted"
               >
                 <User className="h-4 w-4 text-accent" />
-                {t.nav.profile}
+                <span suppressHydrationWarning>{t.nav.profile}</span>
               </Link>
             </nav>
           </motion.div>

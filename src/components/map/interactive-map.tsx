@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { CuratedVenue } from "@/server/mock-venues";
+import { formatPrice } from "@/lib/format-price";
 
 interface InteractiveMapProps {
   venues: CuratedVenue[];
@@ -38,17 +39,12 @@ export default function InteractiveMap({
         zoomControl: true,
       });
 
-      // Production-compatible OpenStreetMap tile provider via CartoDB Voyager CDN
-      // High-performance, retina-ready, zero API key required, with proper attribution
-      L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-        {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
-          subdomains: "abcd",
-          maxZoom: 20,
-        }
-      ).addTo(map);
+      // Official OpenStreetMap tile provider - 100% free, zero API key, zero watermarks
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+      }).addTo(map);
 
       mapInstanceRef.current = map;
     }
@@ -116,7 +112,7 @@ export default function InteractiveMap({
               gap: 5px;
             ">
               <span style="font-size: 12px;">${cat.icon}</span>
-              <span>${venue.pricePerHour.toLocaleString("uz-UZ")} UZS</span>
+              <span>${formatPrice(venue.pricePerHour)} UZS</span>
             </div>
             <div style="
               width: 0;
@@ -190,7 +186,7 @@ export default function InteractiveMap({
             border-bottom: 1px solid #E2E8F0;
           ">
             <div style="font-weight: 800; font-size: 13px; color: #059669;">
-              ${v.pricePerHour.toLocaleString("uz-UZ")} UZS
+              ${formatPrice(v.pricePerHour)} UZS
               <span style="font-size: 10px; font-weight: normal; color: #64748B;">/ soat</span>
             </div>
             <div style="font-size: 11px; font-weight: 700; color: #D97706;">

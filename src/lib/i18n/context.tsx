@@ -44,9 +44,11 @@ export function I18nProvider({
       ) {
         document.cookie = `spacehub_locale=${saved}; path=/; max-age=31536000; SameSite=Lax`;
         document.documentElement.lang = saved;
-        queueMicrotask(() => {
+        // Update state in an animation frame so React hydration phase is 100% completed
+        const handle = requestAnimationFrame(() => {
           setLocaleState(saved);
         });
+        return () => cancelAnimationFrame(handle);
       }
     } catch {
       // ignore

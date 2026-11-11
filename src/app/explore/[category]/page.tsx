@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MapPin, ArrowLeft, Star, ArrowRight } from "lucide-react";
 import { CURATED_VENUES } from "@/server/mock-venues";
+import { formatPrice } from "@/lib/format-price";
 
 const categoryMap: Record<
   string,
@@ -85,7 +86,7 @@ export default async function CategoryExplorePage({
         </Link>
 
         {/* Category Header Banner */}
-        <div className="relative mt-6 overflow-hidden rounded-3xl bg-ink p-8 sm:p-12 text-white shadow-xl">
+        <div className="relative mt-6 overflow-hidden rounded-3xl bg-slate-950 p-8 sm:p-12 text-white shadow-xl">
           <div className="absolute inset-0 opacity-30 pointer-events-none">
             <Image
               src={config.banner}
@@ -94,7 +95,7 @@ export default async function CategoryExplorePage({
               className="object-cover"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
           </div>
           <div className="relative z-10 max-w-xl">
             <span className="inline-block rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-500/40">
@@ -137,7 +138,7 @@ export default async function CategoryExplorePage({
                       fill
                       className="object-cover transition duration-300 group-hover:scale-105"
                     />
-                    <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                    <span className="absolute left-3 top-3 rounded-full bg-slate-900/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                       {venue.categoryName.uz}
                     </span>
                   </div>
@@ -186,7 +187,7 @@ export default async function CategoryExplorePage({
                   <div>
                     <span className="text-xs text-ink-subtle">Narxi:</span>
                     <p className="text-sm font-extrabold text-ink">
-                      {venue.pricePerHour.toLocaleString("uz-UZ")} UZS{" "}
+                      {formatPrice(venue.pricePerHour)} UZS{" "}
                       <span className="text-xs font-normal text-ink-muted">
                         / soat
                       </span>

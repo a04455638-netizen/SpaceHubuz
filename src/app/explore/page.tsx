@@ -16,6 +16,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { CURATED_VENUES } from "../../server/mock-venues";
 import { useI18n } from "../../lib/i18n";
+import { formatPrice } from "@/lib/format-price";
 
 export default function ExplorePage() {
   const { t, locale } = useI18n();
@@ -264,7 +265,7 @@ export default function ExplorePage() {
                     <div className="flex items-center justify-between border-t border-border pt-4">
                       <div>
                         <span className="text-base font-black text-ink">
-                          {venue.pricePerHour.toLocaleString()} UZS
+                          {formatPrice(venue.pricePerHour)} UZS
                         </span>
                         <span className="text-[11px] text-ink-muted"> / {t.common.pricePerHour}</span>
                       </div>

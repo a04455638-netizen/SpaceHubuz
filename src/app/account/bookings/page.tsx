@@ -10,7 +10,9 @@ import {
   CheckCircle2,
   XCircle,
   QrCode,
+  Trash2,
 } from "lucide-react";
+import { formatPrice } from "@/lib/format-price";
 
 interface BookingItem {
   id: string;
@@ -62,6 +64,41 @@ export default function AccountBookingsPage() {
     });
     return () => cancelAnimationFrame(frame);
   }, []);
+
+  async function handleCancelBooking(bookingId: string) {
+    if (
+      !confirm(
+        "Haqiqatan ham bu buyurtmani bekor qilib, ro‘yxatdan butunlay o‘chirmoqchimisiz?"
+      )
+    ) {
+      return;
+    }
+
+    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+
+    try {
+      const saved = localStorage.getItem("spacehub_customer_bookings");
+      if (saved) {
+        const list = JSON.parse(saved);
+        const updated = list.filter((b: { id: string }) => b.id !== bookingId);
+        localStorage.setItem(
+          "spacehub_customer_bookings",
+          JSON.stringify(updated)
+        );
+      }
+    } catch {
+      // ignore
+    }
+
+    fetch("/api/bookings/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bookingId,
+        reason: "Customer cancelled and removed from bookings list",
+      }),
+    }).catch(() => {});
+  }
 
   const filtered = bookings.filter((b) =>
     filter === "ALL" ? true : b.status === filter,
@@ -189,20 +226,31 @@ export default function AccountBookingsPage() {
                   </div>
                 </div>
 
-                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-border">
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-3 sm:pt-0 border-border gap-2">
                   <div className="text-left sm:text-right">
                     <span className="text-xs text-ink-subtle">To‘langan:</span>
                     <p className="text-sm font-extrabold text-accent">
-                      {item.amount.toLocaleString("uz-UZ")} so‘m
+                      {formatPrice(item.amount)} so‘m
                     </p>
                   </div>
-                  <Link
-                    href={`/account/bookings/${item.id}`}
-                    className="mt-2 flex items-center gap-1 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-bold text-ink hover:bg-surface hover:text-accent transition border border-border"
-                  >
-                    <QrCode className="h-3.5 w-3.5" />
-                    <span>QR Chek-in</span>
-                  </Link>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Link
+                      href={`/account/bookings/${item.id}`}
+                      className="flex items-center gap-1 rounded-lg bg-surface-muted px-2.5 py-1.5 text-xs font-bold text-ink hover:bg-surface hover:text-accent transition border border-border"
+                    >
+                      <QrCode className="h-3.5 w-3.5" />
+                      <span>QR Chek-in</span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => handleCancelBooking(item.id)}
+                      title="Buyurtmani bekor qilish va ro'yxatdan o'chirish"
+                      className="flex items-center gap-1 rounded-lg border border-status-danger/40 bg-status-danger-bg px-2.5 py-1.5 text-xs font-bold text-status-danger hover:bg-status-danger hover:text-white transition cursor-pointer"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>Bekor qilish</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

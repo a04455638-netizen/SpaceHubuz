@@ -52,7 +52,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   return (
     <html lang={initialLocale} data-theme="light" suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col bg-surface text-ink antialiased selection:bg-accent-subtle selection:text-accent">
+      <body
+        className="flex min-h-screen flex-col bg-surface text-ink antialiased selection:bg-accent-subtle selection:text-accent"
+        suppressHydrationWarning
+      >
         <I18nProvider initialLocale={initialLocale}>
           <Navbar />
           <div className="flex-1">{children}</div>

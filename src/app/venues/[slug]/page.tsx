@@ -19,6 +19,7 @@ import {
 import { findPublicVenue } from "../../../server/public-venues";
 import { CURATED_VENUES } from "../../../server/mock-venues";
 import { MapWrapper } from "@/components/map/map-wrapper";
+import { formatPrice } from "@/lib/format-price";
 
 export const dynamic = "force-dynamic";
 
@@ -206,7 +207,7 @@ export default async function VenuePage({
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-4">
                     <div className="text-right">
-                      <p className="text-sm font-black text-accent">{res.pricePerHour.toLocaleString()} UZS</p>
+                      <p className="text-sm font-black text-accent">{formatPrice(res.pricePerHour)} UZS</p>
                       <p className="text-[10px] text-ink-muted">soatiga</p>
                     </div>
                     <Link
@@ -277,7 +278,7 @@ export default async function VenuePage({
           <div className="sticky top-20 rounded-2xl border border-border bg-surface-card p-6 shadow-sm space-y-5">
             <div>
               <span className="text-2xl font-black text-ink">
-                {venue.pricePerHour.toLocaleString()} UZS
+                {formatPrice(venue.pricePerHour)} UZS
               </span>
               <span className="text-xs text-ink-muted"> / soatiga</span>
             </div>

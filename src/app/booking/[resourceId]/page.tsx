@@ -10,6 +10,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+import { formatPrice } from "@/lib/format-price";
 
 interface Slot {
   startsAt: string;
@@ -316,7 +317,7 @@ export default function BookingResourcePage({
                       </span>
                     </div>
                     <span className="text-xs font-bold text-ink">
-                      +{addon.price.toLocaleString()} UZS
+                      +{formatPrice(addon.price)} UZS
                     </span>
                   </label>
                 );
@@ -333,10 +334,10 @@ export default function BookingResourcePage({
             <div className="space-y-2 text-xs text-ink-muted border-b border-border pb-4">
               <div className="flex justify-between">
                 <span>
-                  {basePriceHourly.toLocaleString()} x {durationHours} soat
+                  {formatPrice(basePriceHourly)} x {durationHours} soat
                 </span>
                 <span className="font-semibold text-ink">
-                  {subtotal.toLocaleString()} UZS
+                  {formatPrice(subtotal)} UZS
                 </span>
               </div>
 
@@ -344,7 +345,7 @@ export default function BookingResourcePage({
                 <div className="flex justify-between">
                   <span>Qo&apos;shimcha xizmatlar</span>
                   <span className="font-semibold text-ink">
-                    {addonsTotal.toLocaleString()} UZS
+                    {formatPrice(addonsTotal)} UZS
                   </span>
                 </div>
               )}
@@ -352,7 +353,7 @@ export default function BookingResourcePage({
               <div className="flex justify-between">
                 <span>Xizmat haqi (5%)</span>
                 <span className="font-semibold text-ink">
-                  {serviceFee.toLocaleString()} UZS
+                  {formatPrice(serviceFee)} UZS
                 </span>
               </div>
             </div>
@@ -360,7 +361,7 @@ export default function BookingResourcePage({
             <div className="flex items-center justify-between text-sm font-bold text-ink">
               <span>Jami summa:</span>
               <span className="text-base font-extrabold text-accent">
-                {total.toLocaleString()} UZS
+                {formatPrice(total)} UZS
               </span>
             </div>
 
