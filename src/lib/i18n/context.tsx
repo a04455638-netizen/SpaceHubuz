@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   type ReactNode,
 } from "react";
 import type { Locale, Translations } from "./types";
@@ -21,22 +22,36 @@ const I18nContext = createContext<I18nContextValue>({
   t: getTranslation("uz"),
 });
 
-function getInitialLocale(): Locale {
-  if (typeof window === "undefined") return "uz";
-  try {
-    const saved = localStorage.getItem("spacehub_locale") as Locale | null;
-    if (saved && (saved === "uz" || saved === "ru" || saved === "en")) {
-      document.documentElement.lang = saved;
-      return saved;
-    }
-  } catch {
-    // ignore storage access errors
-  }
-  return "uz";
+interface I18nProviderProps {
+  children: ReactNode;
+  initialLocale?: Locale;
 }
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+export function I18nProvider({
+  children,
+  initialLocale = "uz",
+}: I18nProviderProps) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+
+  // Sync client-side if a valid locale exists in localStorage and differs from initial SSR
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("spacehub_locale") as Locale | null;
+      if (
+        saved &&
+        saved !== initialLocale &&
+        (saved === "uz" || saved === "ru" || saved === "en")
+      ) {
+        document.cookie = `spacehub_locale=${saved}; path=/; max-age=31536000; SameSite=Lax`;
+        document.documentElement.lang = saved;
+        queueMicrotask(() => {
+          setLocaleState(saved);
+        });
+      }
+    } catch {
+      // ignore
+    }
+  }, [initialLocale]);
 
   function setLocale(next: Locale) {
     setLocaleState(next);

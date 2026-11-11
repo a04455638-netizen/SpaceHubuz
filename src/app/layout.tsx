@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
 import { Navbar } from "../components/layout/navbar";
 import { Footer } from "../components/layout/footer";
 import { FloatingConcierge } from "../components/ai/floating-concierge";
-import { I18nProvider } from "../lib/i18n";
+import { I18nProvider, type Locale } from "../lib/i18n";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -43,11 +44,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies();
+  const saved = cookieStore.get("spacehub_locale")?.value;
+  const initialLocale: Locale =
+    saved === "ru" || saved === "en" || saved === "uz" ? saved : "uz";
+
   return (
-    <html lang="uz" data-theme="light">
+    <html lang={initialLocale} data-theme="light" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col bg-surface text-ink antialiased selection:bg-accent-subtle selection:text-accent">
-        <I18nProvider>
+        <I18nProvider initialLocale={initialLocale}>
           <Navbar />
           <div className="flex-1">{children}</div>
           <Footer />
