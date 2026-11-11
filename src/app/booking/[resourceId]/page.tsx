@@ -32,6 +32,8 @@ export default function BookingResourcePage({
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [occupiedSlots, setOccupiedSlots] = useState<Slot[]>([]);
   const [creating, setCreating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [suggestedSlots, setSuggestedSlots] = useState<Array<{ startsAt: string; endsAt: string }>>([]);
 
   const basePriceHourly = 50000; // 50,000 UZS base
 
@@ -85,162 +87,221 @@ export default function BookingResourcePage({
   const serviceFee = Math.round(subtotal * 0.05); // 5% service fee
   const total = subtotal + addonsTotal + serviceFee;
 
-  function handleProceed() {
-    if (isBooked) return;
+  async function handleProceed() {
+    if (isBooked || creating) return;
     setCreating(true);
-    // Create hold identifier and redirect to checkout
-    const holdId = `bkg_${Date.now().toString(36)}`;
-    // Store preliminary hold info in sessionStorage
-    sessionStorage.setItem(
-      `booking_${holdId}`,
-      JSON.stringify({
-        resourceId,
-        date,
-        startHour,
-        durationHours,
-        addons: selectedAddons,
-        total,
-      }),
-    );
-    router.push(`/checkout/${holdId}`);
+    setErrorMessage("");
+    setSuggestedSlots([]);
+
+    const startsAt = `${date}T${startHour}:00Z`;
+    const endMs = new Date(startsAt).getTime() + durationHours * 3600000;
+    const endsAt = new Date(endMs).toISOString();
+
+    try {
+      const res = await fetch("/api/bookings/hold", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceId,
+          startsAt,
+          endsAt,
+          guestCount: 1,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 401) {
+        // Redirect to login preserving booking intent
+        router.push(`/auth/login?redirect=/booking/${resourceId}`);
+        return;
+      }
+
+      if (!res.ok) {
+        setErrorMessage(data.message || "Ushbu vaqt band qilingan");
+        if (data.suggestedSlots) {
+          setSuggestedSlots(data.suggestedSlots);
+        }
+        setCreating(false);
+        return;
+      }
+
+      sessionStorage.setItem(
+        `booking_${data.bookingId}`,
+        JSON.stringify({
+          resourceId,
+          date,
+          startHour,
+          durationHours,
+          addons: selectedAddons,
+          total: data.totalAmount || total,
+          expiresAt: data.expiresAt,
+        }),
+      );
+
+      router.push(`/checkout/${data.bookingId}`);
+    } catch {
+      setErrorMessage("Tarmoq xatosi. Iltimos qaytadan urinib ko'ring.");
+      setCreating(false);
+    }
   }
 
-  const timeSlots = [
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
-    "21:00",
-  ];
-
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <Link
-        href="/explore"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
+        href={`/venues/${resourceId}`}
+        className="inline-flex items-center gap-2 text-xs font-semibold text-accent hover:underline mb-6"
       >
-        <ArrowLeft className="h-4 w-4" /> Joy tafsilotlariga qaytish
+        <ArrowLeft className="h-4 w-4" /> Orqaga qaytish
       </Link>
 
-      <div className="mt-4">
-        <h1 className="text-2xl font-extrabold text-ink sm:text-3xl">
-          Vaqtni tanlang va bron qiling
-        </h1>
-        <p className="mt-1 text-sm text-ink-muted">
-          Resurs ID: <code className="text-xs font-mono">{resourceId}</code>
-        </p>
-      </div>
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        {/* Left: Configuration form */}
+        <div className="md:col-span-2 space-y-6">
+          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm">
+            <h1 className="text-xl font-extrabold text-ink sm:text-2xl">
+              Vaqt va Sanani tanlash
+            </h1>
+            <p className="mt-1 text-xs text-ink-muted">
+              Joyning bandligini real vaqtda tekshiring va vaqtni bron qiling
+            </p>
 
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* Left Form: Date & Slot Picker */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Date Picker */}
-          <div className="rounded-2xl border border-border bg-surface-card p-5 shadow-sm">
-            <label className="flex items-center gap-2 text-sm font-bold text-ink">
-              <CalendarIcon className="h-4 w-4 text-accent" />
-              1. Bron sanasini tanlang
-            </label>
-            <input
-              type="date"
-              value={date}
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-3 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-ink focus:border-accent focus:outline-none"
-            />
-          </div>
-
-          {/* Time Slot Picker */}
-          <div className="rounded-2xl border border-border bg-surface-card p-5 shadow-sm">
-            <label className="flex items-center gap-2 text-sm font-bold text-ink">
-              <Clock className="h-4 w-4 text-accent" />
-              2. Boshlanish vaqtini tanlang
-            </label>
-            <div className="mt-4 grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-7">
-              {timeSlots.map((time) => {
-                const isSelected = startHour === time;
-                return (
-                  <button
-                    key={time}
-                    type="button"
-                    onClick={() => setStartHour(time)}
-                    className={`rounded-xl py-2 text-xs font-bold transition ${
-                      isSelected
-                        ? "bg-accent text-white shadow"
-                        : "border border-border bg-surface text-ink hover:border-accent hover:text-accent"
-                    }`}
-                  >
-                    {time}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Duration Selector */}
-            <div className="mt-6">
-              <label className="text-xs font-bold uppercase tracking-wider text-ink-muted">
-                Davomiyligi (soat)
-              </label>
-              <div className="mt-2 flex gap-3">
-                {[1, 2, 3, 4, 8].map((hours) => (
-                  <button
-                    key={hours}
-                    type="button"
-                    onClick={() => setDurationHours(hours)}
-                    className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
-                      durationHours === hours
-                        ? "bg-ink text-white"
-                        : "border border-border bg-surface text-ink hover:border-ink"
-                    }`}
-                  >
-                    {hours} soat
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Conflict Warning */}
-            {isBooked ? (
-              <div className="mt-6 flex items-center gap-2 rounded-xl bg-status-danger-bg p-3.5 text-xs font-semibold text-status-danger">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                <span>
-                  Tanlangan vaqt oralig‘i ({startHour} dan{" "}
-                  {Number(startHour.split(":")[0]) + durationHours}:00 gacha)
-                  boshqa mijoz tomonidan allaqachon band qilingan. Iltimos,
-                  boshqa vaqtni tanlang.
-                </span>
-              </div>
-            ) : (
-              <div className="mt-6 flex items-center gap-2 rounded-xl bg-status-success-bg p-3 text-xs font-semibold text-status-success">
-                <CheckCircle className="h-4 w-4 flex-shrink-0" />
-                <span>Tanlangan vaqt bo‘sh va bron qilish mumkin!</span>
+            {errorMessage && (
+              <div className="mt-4 rounded-xl bg-status-danger-bg p-4 text-xs font-semibold text-status-danger">
+                <p>{errorMessage}</p>
+                {suggestedSlots.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-status-danger/20">
+                    <p className="font-bold">Tavsiya etiladigan bo&apos;sh vaqt:</p>
+                    {suggestedSlots.map((slot, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          const slotDate = slot.startsAt.split("T")[0];
+                          const slotHour = slot.startsAt.split("T")[1]?.slice(0, 5) || "12:00";
+                          setDate(slotDate);
+                          setStartHour(slotHour);
+                          setErrorMessage("");
+                        }}
+                        className="mt-1 block underline font-bold"
+                      >
+                        {slot.startsAt.slice(11, 16)} dan {slot.endsAt.slice(11, 16)} gacha
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
+
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
+                  Sana
+                </label>
+                <div className="relative mt-1.5">
+                  <CalendarIcon className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-subtle" />
+                  <input
+                    type="date"
+                    value={date}
+                    min={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-surface pl-10 pr-4 py-2 text-sm font-semibold text-ink focus:border-accent focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
+                    Boshlanish vaqti
+                  </label>
+                  <div className="relative mt-1.5">
+                    <Clock className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-subtle" />
+                    <select
+                      value={startHour}
+                      onChange={(e) => setStartHour(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-surface pl-10 pr-4 py-2 text-sm font-semibold text-ink focus:border-accent focus:outline-none"
+                    >
+                      {[
+                        "09:00",
+                        "10:00",
+                        "11:00",
+                        "12:00",
+                        "13:00",
+                        "14:00",
+                        "15:00",
+                        "16:00",
+                        "17:00",
+                        "18:00",
+                        "19:00",
+                        "20:00",
+                        "21:00",
+                      ].map((hour) => (
+                        <option key={hour} value={hour}>
+                          {hour}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-ink-muted">
+                    Davomiyligi
+                  </label>
+                  <select
+                    value={durationHours}
+                    onChange={(e) => setDurationHours(Number(e.target.value))}
+                    className="mt-1.5 w-full rounded-xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-ink focus:border-accent focus:outline-none"
+                  >
+                    <option value={1}>1 soat</option>
+                    <option value={2}>2 soat</option>
+                    <option value={3}>3 soat</option>
+                    <option value={4}>4 soat</option>
+                    <option value={8}>8 soat (Kunlik)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Status Alert */}
+              <div
+                className={`flex items-center gap-2 rounded-xl p-3 text-xs font-semibold ${
+                  isBooked
+                    ? "bg-status-danger-bg text-status-danger"
+                    : "bg-status-success-bg text-status-success"
+                }`}
+              >
+                {isBooked ? (
+                  <>
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>
+                      Ushbu tanlangan vaqt band qilingan. Iltimos, boshqa vaqtni
+                      tanlang.
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 shrink-0" />
+                    <span>Ushbu vaqt oralig&apos;i bo&apos;sh! Darhol band qilishingiz mumkin.</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Add-ons */}
-          <div className="rounded-2xl border border-border bg-surface-card p-5 shadow-sm">
-            <h3 className="text-sm font-bold text-ink">
-              3. Qo‘shimcha xizmatlar (ixtiyoriy)
-            </h3>
-            <div className="mt-3 space-y-2.5">
+          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm">
+            <h2 className="text-base font-bold text-ink">Qo&apos;shimcha xizmatlar</h2>
+            <div className="mt-4 space-y-3">
               {addonsList.map((addon) => {
                 const checked = selectedAddons.includes(addon.id);
                 return (
                   <label
                     key={addon.id}
-                    className={`flex cursor-pointer items-center justify-between rounded-xl border p-3.5 transition ${
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition ${
                       checked
-                        ? "border-accent bg-accent-subtle/40"
-                        : "border-border bg-surface"
+                        ? "border-accent bg-accent-subtle/30"
+                        : "border-border hover:bg-surface-muted"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -248,14 +309,14 @@ export default function BookingResourcePage({
                         type="checkbox"
                         checked={checked}
                         onChange={() => toggleAddon(addon.id)}
-                        className="h-4 w-4 rounded accent-accent"
+                        className="rounded border-border text-accent focus:ring-accent"
                       />
-                      <span className="text-sm font-medium text-ink">
+                      <span className="text-xs font-semibold text-ink">
                         {addon.name}
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-accent">
-                      +{addon.price.toLocaleString("uz-UZ")} so‘m
+                    <span className="text-xs font-bold text-ink">
+                      +{addon.price.toLocaleString()} UZS
                     </span>
                   </label>
                 );
@@ -264,63 +325,58 @@ export default function BookingResourcePage({
           </div>
         </div>
 
-        {/* Right Summary Sidebar */}
-        <div className="h-fit rounded-2xl border border-border bg-surface-card p-5 shadow-sm">
-          <h2 className="text-base font-bold text-ink">Hisob-kitob</h2>
-          <div className="mt-4 space-y-3 text-sm text-ink-muted">
-            <div className="flex justify-between">
-              <span>Sana:</span>
-              <span className="font-semibold text-ink">{date}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Vaqt:</span>
-              <span className="font-semibold text-ink">
-                {startHour} ({durationHours} soat)
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Asosiy ijara:</span>
-              <span className="font-semibold text-ink">
-                {subtotal.toLocaleString("uz-UZ")} so‘m
-              </span>
-            </div>
-            {addonsTotal > 0 && (
+        {/* Right: Summary card */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-border bg-surface-card p-6 shadow-sm space-y-4">
+            <h2 className="text-base font-bold text-ink">To&apos;lov hisobi</h2>
+
+            <div className="space-y-2 text-xs text-ink-muted border-b border-border pb-4">
               <div className="flex justify-between">
-                <span>Qo‘shimcha xizmatlar:</span>
+                <span>
+                  {basePriceHourly.toLocaleString()} x {durationHours} soat
+                </span>
                 <span className="font-semibold text-ink">
-                  {addonsTotal.toLocaleString("uz-UZ")} so‘m
+                  {subtotal.toLocaleString()} UZS
                 </span>
               </div>
-            )}
-            <div className="flex justify-between">
-              <span>Xizmat haqi (5%):</span>
-              <span className="font-semibold text-ink">
-                {serviceFee.toLocaleString("uz-UZ")} so‘m
+
+              {addonsTotal > 0 && (
+                <div className="flex justify-between">
+                  <span>Qo&apos;shimcha xizmatlar</span>
+                  <span className="font-semibold text-ink">
+                    {addonsTotal.toLocaleString()} UZS
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between">
+                <span>Xizmat haqi (5%)</span>
+                <span className="font-semibold text-ink">
+                  {serviceFee.toLocaleString()} UZS
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-sm font-bold text-ink">
+              <span>Jami summa:</span>
+              <span className="text-base font-extrabold text-accent">
+                {total.toLocaleString()} UZS
               </span>
             </div>
 
-            <div className="my-2 border-t border-border pt-2 flex justify-between text-base font-extrabold text-ink">
-              <span>Jami:</span>
-              <span className="text-accent">
-                {total.toLocaleString("uz-UZ")} so‘m
-              </span>
-            </div>
+            <button
+              onClick={handleProceed}
+              disabled={isBooked || creating}
+              className="flex w-full items-center justify-center rounded-xl bg-accent py-3 text-xs font-bold text-white shadow-sm transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            >
+              {creating ? "Band qilinmoqda..." : "Bron qilish va to'lovga o'tish"}
+            </button>
+            <p className="text-center text-[10px] text-ink-subtle">
+              15 daqiqalik vaqtinchalik bron (hold) yaratiladi
+            </p>
           </div>
-
-          <button
-            type="button"
-            onClick={handleProceed}
-            disabled={isBooked || creating}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-bold text-white shadow transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {creating ? "Yuklanmoqda…" : "To‘lovga o‘tish"}
-          </button>
-
-          <p className="mt-3 text-center text-xs text-ink-subtle">
-            Keyingi qadamda Click yoki Payme orqali to‘lash mumkin
-          </p>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
